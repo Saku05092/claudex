@@ -1,0 +1,41 @@
+{
+  "name": "claudex",
+  "version": "0.1.0",
+  "description": "AI-powered crypto SNS account management system for DeFi referral content",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src/",
+    "scrape:defilama": "tsx src/scrapers/defilama.ts",
+    "post:preview": "tsx src/core/content-generator.ts --preview",
+    "dashboard:dev": "next dev src/dashboard",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@resvg/resvg-js": "^2.6.0",
+    "better-sqlite3": "^11.0.0",
+    "discord.js": "^14.16.0",
+    "dotenv": "^16.4.0",
+    "grammy": "^1.30.0",
+    "node-cron": "^3.0.3",
+    "satori": "^0.12.0",
+    "sharp": "^0.33.0",
+    "twitter-api-v2": "^1.17.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/node": "^22.0.0",
+    "@types/node-cron": "^3.0.11",
+    "eslint": "^9.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
