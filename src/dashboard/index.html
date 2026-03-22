@@ -320,6 +320,71 @@
     color: var(--text-secondary);
   }
 
+  /* ---- CTA Button ---- */
+  .card-cta {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .cta-button {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: all var(--transition);
+    letter-spacing: 0.02em;
+  }
+  .cta-button.cta-primary {
+    background: var(--gradient-1);
+    color: #fff;
+  }
+  .cta-button.cta-primary:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+  }
+  .cta-button.cta-secondary {
+    background: transparent;
+    border: 1px solid var(--accent-1);
+    color: var(--accent-1);
+  }
+  .cta-button.cta-secondary:hover {
+    background: rgba(99,102,241,0.1);
+  }
+  .cta-button.cta-disabled {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: default;
+  }
+  .cta-button.cta-disabled:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  .cta-subtext {
+    display: block;
+    text-align: center;
+    margin-top: 6px;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+  .cta-pr {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--accent-yellow);
+    border: 1px solid var(--accent-yellow);
+    border-radius: 3px;
+    padding: 1px 5px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
   /* ---- Comparison Table ---- */
   .table-section { margin-bottom: 48px; }
   .table-wrapper {
@@ -548,6 +613,13 @@ const CARDS = [
     referral: "なし（公式情報なし）",
     availability: "日本国内対応",
     status: "提供中",
+    cta: {
+      link: "",
+      label: "公式サイトで申し込む",
+      sublabel: "Binance Japan口座が必要です",
+      type: "secondary",
+      officialUrl: "https://www.binance.com/en-JP/japan-credit-card-apply"
+    },
     details: {
       "発行元": "Binance Japan / BISION",
       "決済ネットワーク": "JCB",
@@ -571,6 +643,13 @@ const CARDS = [
     referral: "未発表",
     availability: "日本国内対応（Coming Soon）",
     status: "近日リリース予定",
+    cta: {
+      link: "",
+      label: "リリースを待つ",
+      sublabel: "正式リリース時にリンクを更新予定",
+      type: "disabled",
+      officialUrl: "https://slash.fi/"
+    },
     details: {
       "発行元": "Slash Fintech / SoftBank Payment Service",
       "決済ネットワーク": "Visa",
@@ -594,6 +673,13 @@ const CARDS = [
     referral: "なし",
     availability: "日本国内対応",
     status: "提供中",
+    cta: {
+      link: "",
+      label: "公式サイトで詳細を見る",
+      sublabel: "Nudgeアプリのダウンロードが必要です",
+      type: "secondary",
+      officialUrl: "https://nudge.works/"
+    },
     details: {
       "発行元": "Nudge / HashPort",
       "決済ネットワーク": "Visa",
@@ -617,6 +703,13 @@ const CARDS = [
     referral: "なし",
     availability: "日本国内対応",
     status: "提供中",
+    cta: {
+      link: "",
+      label: "bitFlyerで申し込む",
+      sublabel: "bitFlyer口座が必要です",
+      type: "secondary",
+      officialUrl: "https://bitflyer.com/en-jp/"
+    },
     details: {
       "発行元": "bitFlyer / アプラス（新生銀行グループ）",
       "決済ネットワーク": "Visa",
@@ -640,6 +733,13 @@ const CARDS = [
     referral: "あり（詳細は公式サイト参照）",
     availability: "150+ 国対応（日本を含む）",
     status: "提供中",
+    cta: {
+      link: "",
+      label: "Tria Cardに申し込む",
+      sublabel: "150カ国以上で利用可能 / 最大6%還元",
+      type: "primary",
+      officialUrl: "https://www.tria.so/en"
+    },
     details: {
       "発行元": "Tria",
       "決済ネットワーク": "Visa",
@@ -663,6 +763,13 @@ const CARDS = [
     referral: "$25/紹介（上限なし）",
     availability: "日本対応未確認",
     status: "提供中（日本対応要確認）",
+    cta: {
+      link: "",
+      label: "KAST Cardに申し込む",
+      sublabel: "最大12%還元 / $25紹介報酬",
+      type: "primary",
+      officialUrl: "https://www.kast.xyz/"
+    },
     details: {
       "発行元": "KAST",
       "決済ネットワーク": "Visa",
@@ -686,6 +793,13 @@ const CARDS = [
     referral: "なし",
     availability: "42カ国対応（日本を含む）",
     status: "提供中",
+    cta: {
+      link: "",
+      label: "Tangem Payを見る",
+      sublabel: "手数料完全無料 / 42カ国対応",
+      type: "secondary",
+      officialUrl: "https://tangem.com/en/cardwaitlist/"
+    },
     details: {
       "発行元": "Tangem",
       "決済ネットワーク": "Visa",
@@ -741,8 +855,35 @@ function renderCards() {
           </div>
         </div>
       </div>
+      ${renderCta(card.cta)}
     </div>
   `).join('');
+}
+
+// ---- Render CTA ----
+function renderCta(cta) {
+  if (!cta) return '';
+  const url = cta.link || cta.officialUrl;
+  const isPR = cta.link !== '';
+  const typeClass = cta.type === 'primary' ? 'cta-primary' : cta.type === 'disabled' ? 'cta-disabled' : 'cta-secondary';
+
+  if (cta.type === 'disabled') {
+    return `
+      <div class="card-cta">
+        <span class="cta-button cta-disabled">${cta.label}</span>
+        <span class="cta-subtext">${cta.sublabel}</span>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="card-cta" onclick="event.stopPropagation()">
+      <a href="${url}" target="_blank" rel="noopener noreferrer" class="cta-button ${typeClass}">
+        ${cta.label}${isPR ? '<span class="cta-pr">PR</span>' : ''}
+      </a>
+      <span class="cta-subtext">${cta.sublabel}</span>
+    </div>
+  `;
 }
 
 // ---- Render Table ----
