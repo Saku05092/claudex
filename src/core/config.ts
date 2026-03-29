@@ -23,6 +23,10 @@ const envSchema = z.object({
   // Claude API
   ANTHROPIC_API_KEY: z.string().optional(),
 
+  // Monitoring
+  TWITTER_MONITOR_MAX_RESULTS: z.coerce.number().int().min(10).max(100).default(10).optional(),
+  TWITTER_MONITOR_ENABLED: z.coerce.boolean().default(false).optional(),
+
   // Optional
   CRYPTOPANIC_API_KEY: z.string().optional(),
 });
@@ -39,15 +43,15 @@ export function loadConfig(): EnvConfig {
   return result.data;
 }
 
-export function getRequiredConfig(
+export function getRequiredConfig<K extends keyof EnvConfig>(
   config: EnvConfig,
-  key: keyof EnvConfig
-): string {
+  key: K
+): NonNullable<EnvConfig[K]> {
   const value = config[key];
-  if (!value) {
+  if (value === undefined || value === null || value === "") {
     throw new Error(
-      `Missing required config: ${key}. Check your .env file.`
+      `Missing required config: ${String(key)}. Check your .env file.`
     );
   }
-  return value;
+  return value as NonNullable<EnvConfig[K]>;
 }

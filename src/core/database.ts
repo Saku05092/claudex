@@ -82,5 +82,71 @@ function initializeSchema(db: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_posts_status ON scheduled_posts(status);
     CREATE INDEX IF NOT EXISTS idx_posts_scheduled ON scheduled_posts(scheduled_at);
     CREATE INDEX IF NOT EXISTS idx_protocols_first_seen ON defi_protocols(first_seen);
+
+    CREATE TABLE IF NOT EXISTS collected_tweets (
+      tweet_id TEXT PRIMARY KEY,
+      author_id TEXT NOT NULL,
+      author_username TEXT NOT NULL,
+      author_name TEXT,
+      author_followers INTEGER,
+      text TEXT NOT NULL,
+      language TEXT,
+      retweet_count INTEGER DEFAULT 0,
+      reply_count INTEGER DEFAULT 0,
+      like_count INTEGER DEFAULT 0,
+      quote_count INTEGER DEFAULT 0,
+      tweeted_at TEXT NOT NULL,
+      source_type TEXT NOT NULL CHECK(source_type IN ('keyword', 'influencer')),
+      source_query TEXT NOT NULL,
+      collected_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS monitor_runs (
+      id TEXT PRIMARY KEY,
+      run_type TEXT NOT NULL CHECK(run_type IN ('keyword', 'influencer')),
+      started_at TEXT NOT NULL,
+      completed_at TEXT,
+      queries_executed INTEGER DEFAULT 0,
+      tweets_found INTEGER DEFAULT 0,
+      tweets_new INTEGER DEFAULT 0,
+      estimated_credits_used REAL DEFAULT 0,
+      status TEXT DEFAULT 'running' CHECK(status IN ('running', 'completed', 'failed')),
+      error TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_tweets_author ON collected_tweets(author_username);
+    CREATE INDEX IF NOT EXISTS idx_tweets_source ON collected_tweets(source_type);
+    CREATE INDEX IF NOT EXISTS idx_tweets_tweeted ON collected_tweets(tweeted_at);
+    CREATE INDEX IF NOT EXISTS idx_tweets_collected ON collected_tweets(collected_at);
+
+    CREATE TABLE IF NOT EXISTS campaigns (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      ticker TEXT DEFAULT '',
+      category TEXT DEFAULT '',
+      chain TEXT DEFAULT '',
+      tier TEXT DEFAULT 'B' CHECK(tier IN ('S', 'A', 'B', 'C')),
+      status TEXT DEFAULT 'active' CHECK(status IN ('active', 'upcoming', 'ended')),
+      tge_completed INTEGER DEFAULT 0,
+      description TEXT DEFAULT '',
+      tasks TEXT DEFAULT '[]',
+      estimated_value TEXT DEFAULT '',
+      funding_raised TEXT DEFAULT '',
+      backers TEXT DEFAULT '[]',
+      website TEXT DEFAULT '',
+      twitter TEXT DEFAULT '',
+      referral_link TEXT DEFAULT '',
+      referral_reward TEXT DEFAULT '',
+      risk_level TEXT DEFAULT 'medium' CHECK(risk_level IN ('low', 'medium', 'high')),
+      deadline TEXT DEFAULT '',
+      added_at TEXT DEFAULT '',
+      source TEXT DEFAULT 'manual' CHECK(source IN ('manual', 'tweet', 'defilama')),
+      verified INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_campaigns_status ON campaigns(status);
+    CREATE INDEX IF NOT EXISTS idx_campaigns_source ON campaigns(source);
   `);
 }
