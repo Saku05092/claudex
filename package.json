@@ -14,6 +14,8 @@
     "scrape:defilama": "tsx src/scrapers/defilama.ts",
     "post:preview": "tsx src/core/content-generator.ts --preview",
     "dashboard:dev": "next dev src/dashboard",
+    "api": "tsx src/api/server.ts",
+    "api:dev": "tsx watch src/api/server.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

@@ -1,0 +1,300 @@
+/**
+ * Structured airdrop and card data for the Claudex API.
+ * This is the single source of truth consumed by both the
+ * dashboard HTML and the AirHunt mobile app.
+ */
+
+export interface AirdropCampaign {
+  readonly id: string;
+  readonly name: string;
+  readonly ticker: string;
+  readonly category: string;
+  readonly chain: string;
+  readonly tier: "S" | "A" | "B" | "C";
+  readonly status: "active" | "upcoming" | "ended";
+  readonly tgeCompleted: boolean;
+  readonly description: string;
+  readonly tasks: readonly { title: string; description: string }[];
+  readonly estimatedValue: string;
+  readonly fundingRaised: string;
+  readonly backers: readonly string[];
+  readonly website: string;
+  readonly twitter: string;
+  readonly referralLink: string;
+  readonly referralReward: string;
+  readonly riskLevel: "low" | "medium" | "high";
+  readonly deadline: string;
+  readonly addedAt: string;
+}
+
+export const CAMPAIGNS: readonly AirdropCampaign[] = [
+  {
+    id: "edgex",
+    name: "edgeX",
+    ticker: "EDGE",
+    category: "Perp DEX",
+    chain: "Ethereum",
+    tier: "S",
+    status: "active",
+    tgeCompleted: false,
+    description: "Amber Group支援の高性能Perp DEX。累計取引量$600B+、OI $1B+。TGE 3/31確定。コミュニティに20-35%配布、VC投げ売りなし。XP 1:1トークン変換。",
+    tasks: [
+      { title: "3/30までにXP登録を完了", description: "登録期限は3/30" },
+      { title: "edgeXで取引してXPを獲得", description: "取引量に応じてXP付与" },
+      { title: "リファーラルで友人招待", description: "1/5ポイント+30%手数料還元" },
+      { title: "Pre-TGE Seasonに参加", description: "XPが1:1でEDGEトークンに変換" },
+    ],
+    estimatedValue: "$500-3,000+",
+    fundingRaised: "Amber Group支援",
+    backers: ["Amber Group"],
+    website: "https://www.edgex.exchange",
+    twitter: "@edgex_exchange",
+    referralLink: "",
+    referralReward: "1/5 of referee points + 30% fee rebate",
+    riskLevel: "low",
+    deadline: "2026-03-31",
+    addedAt: "2026-03-22",
+  },
+  {
+    id: "opensea",
+    name: "OpenSea",
+    ticker: "SEA",
+    category: "NFT",
+    chain: "Ethereum",
+    tier: "S",
+    status: "active",
+    tgeCompleted: false,
+    description: "最大手NFTマーケットプレイス。SEAトークン50%コミュニティ配布予定。CEO延期発表(市場環境理由)。収益の50%でバイバック予定。",
+    tasks: [
+      { title: "OpenSeaでNFT取引を継続", description: "複数カテゴリで取引実績を作る" },
+      { title: "リワードプログラム参加", description: "公式のリワードプログラムに登録" },
+      { title: "延期中だが活動実績を積む", description: "TGE日は未定だがアクティビティを継続" },
+    ],
+    estimatedValue: "$500-5,000",
+    fundingRaised: "$423M",
+    backers: ["a16z", "Paradigm", "Coatue"],
+    website: "https://opensea.io",
+    twitter: "@opensea",
+    referralLink: "",
+    referralReward: "",
+    riskLevel: "low",
+    deadline: "",
+    addedAt: "2026-01-15",
+  },
+  {
+    id: "polymarket",
+    name: "Polymarket",
+    ticker: "POLY",
+    category: "Prediction Market",
+    chain: "Polygon",
+    tier: "S",
+    status: "active",
+    tgeCompleted: false,
+    description: "分散型予測市場。累計取引量$20B突破。$POLY商標出願(2026年2月)。CMOがエアドロップ確定を発言。供給の5-10%が配布予定。",
+    tasks: [
+      { title: "様々な予測市場で取引", description: "カテゴリを分散させる" },
+      { title: "複数市場でポジション保有", description: "継続的な取引実績を作る" },
+      { title: "流動性を提供", description: "LPとして参加" },
+    ],
+    estimatedValue: "$500-2,000",
+    fundingRaised: "$74M",
+    backers: ["Founders Fund", "1confirmation", "Vitalik Buterin"],
+    website: "https://polymarket.com",
+    twitter: "@Polymarket",
+    referralLink: "",
+    referralReward: "",
+    riskLevel: "medium",
+    deadline: "",
+    addedAt: "2026-02-15",
+  },
+  {
+    id: "linea",
+    name: "Linea",
+    ticker: "",
+    category: "L2",
+    chain: "Ethereum L2",
+    tier: "A",
+    status: "active",
+    tgeCompleted: false,
+    description: "ConsenSys開発のzkEVM L2。LXPポイントプログラム進行中。MetaMask Rewardsポイントが将来Lineaトークンに変換予定。",
+    tasks: [
+      { title: "Lineaにブリッジ", description: "ETHをLineaにブリッジ" },
+      { title: "エコシステムDAppsを利用", description: "DEX、レンディング等を利用" },
+      { title: "MetaMask Rewardsポイント獲得", description: "MetaMaskでスワップしてポイント取得" },
+    ],
+    estimatedValue: "$200-1,500",
+    fundingRaised: "ConsenSys ($725M)",
+    backers: ["ConsenSys", "Microsoft", "SoftBank"],
+    website: "https://linea.build",
+    twitter: "@LineaBuild",
+    referralLink: "",
+    referralReward: "",
+    riskLevel: "low",
+    deadline: "",
+    addedAt: "2026-02-10",
+  },
+  {
+    id: "eclipse",
+    name: "Eclipse",
+    ticker: "",
+    category: "L2",
+    chain: "Ethereum L2 (SVM)",
+    tier: "A",
+    status: "active",
+    tgeCompleted: false,
+    description: "Solana VMベースのEthereum L2。メインネット稼働中、トークン未発表。SVMの高速性とEthereumのセキュリティを統合。",
+    tasks: [
+      { title: "Eclipseにブリッジ", description: "ETHをEclipseに移動" },
+      { title: "DAppsを利用", description: "エコシステム内のDAppsを利用" },
+      { title: "トランザクションを生成", description: "継続的にアクティビティを残す" },
+    ],
+    estimatedValue: "$300-1,200",
+    fundingRaised: "$65M",
+    backers: ["Placeholder", "Polychain", "Tribe Capital"],
+    website: "https://eclipse.xyz",
+    twitter: "@EclipseFND",
+    referralLink: "",
+    referralReward: "",
+    riskLevel: "medium",
+    deadline: "",
+    addedAt: "2026-03-15",
+  },
+  {
+    id: "hyperlane",
+    name: "Hyperlane",
+    ticker: "",
+    category: "Bridge",
+    chain: "Multi-chain",
+    tier: "A",
+    status: "active",
+    tgeCompleted: false,
+    description: "パーミッションレスなクロスチェーンメッセージングプロトコル。トークン未発表。",
+    tasks: [
+      { title: "Hyperlaneでブリッジ", description: "対応チェーン間で資産を移動" },
+      { title: "複数チェーンで送金", description: "異なるチェーンペアを試す" },
+      { title: "Warpルート利用", description: "Warpルート経由でブリッジ" },
+    ],
+    estimatedValue: "$200-800",
+    fundingRaised: "$18.5M",
+    backers: ["Variant", "Galaxy Digital"],
+    website: "https://hyperlane.xyz",
+    twitter: "@Hyperlane_xyz",
+    referralLink: "",
+    referralReward: "",
+    riskLevel: "medium",
+    deadline: "",
+    addedAt: "2026-02-20",
+  },
+  {
+    id: "lighter",
+    name: "Lighter",
+    ticker: "",
+    category: "Perp DEX",
+    chain: "Ethereum",
+    tier: "A",
+    status: "active",
+    tgeCompleted: false,
+    description: "高性能Perp DEX。ポイントベースのインセンティブシステム稼働中。Hyperliquidの次のエアドロ候補として注目。",
+    tasks: [
+      { title: "取引を実行", description: "Perp取引でポイント獲得" },
+      { title: "ポイントを獲得", description: "取引量に応じたポイント" },
+      { title: "流動性を提供", description: "LP参加でボーナスポイント" },
+    ],
+    estimatedValue: "$200-1,000",
+    fundingRaised: "非公開",
+    backers: [],
+    website: "https://lighter.xyz",
+    twitter: "@lighter_xyz",
+    referralLink: "",
+    referralReward: "",
+    riskLevel: "medium",
+    deadline: "",
+    addedAt: "2026-03-10",
+  },
+  {
+    id: "phantom",
+    name: "Phantom Wallet",
+    ticker: "",
+    category: "Wallet",
+    chain: "Multi-chain",
+    tier: "B",
+    status: "active",
+    tgeCompleted: false,
+    description: "主要マルチチェーンウォレット。$118M調達済み。トークン未発表だがVC投資規模から期待大。",
+    tasks: [
+      { title: "Phantomウォレットを日常利用", description: "メインウォレットとして使用" },
+      { title: "スワップ機能を利用", description: "Phantom内蔵スワップ" },
+      { title: "マルチチェーン対応を活用", description: "複数チェーンで利用" },
+    ],
+    estimatedValue: "$100-500",
+    fundingRaised: "$118M",
+    backers: ["Paradigm", "a16z"],
+    website: "https://phantom.app",
+    twitter: "@phantom",
+    referralLink: "",
+    referralReward: "",
+    riskLevel: "high",
+    deadline: "",
+    addedAt: "2026-03-01",
+  },
+  {
+    id: "ambient",
+    name: "Ambient Finance",
+    ticker: "",
+    category: "DEX",
+    chain: "Ethereum",
+    tier: "B",
+    status: "active",
+    tgeCompleted: false,
+    description: "シングルコントラクトDEX。集中流動性とアンビエントポジションを提供。トークン未発表。",
+    tasks: [
+      { title: "スワップを実行", description: "Ambient上でトークン交換" },
+      { title: "流動性を提供", description: "LPとして参加" },
+      { title: "複数プールを利用", description: "異なるプールで活動" },
+    ],
+    estimatedValue: "$100-500",
+    fundingRaised: "$6.5M",
+    backers: ["Bloccelerate", "Circle Ventures"],
+    website: "https://ambient.finance",
+    twitter: "@ambient_finance",
+    referralLink: "",
+    referralReward: "",
+    riskLevel: "medium",
+    deadline: "",
+    addedAt: "2026-03-05",
+  },
+  {
+    id: "karak",
+    name: "Karak",
+    ticker: "",
+    category: "Restaking",
+    chain: "Multi-chain",
+    tier: "B",
+    status: "active",
+    tgeCompleted: false,
+    description: "リステーキングプラットフォーム。ポイントプログラム進行中。$48M調達済み。",
+    tasks: [
+      { title: "資産をリステーク", description: "対応アセットをステーク" },
+      { title: "ポイントを獲得", description: "ステーク量に応じたポイント" },
+      { title: "DSSに参加", description: "Distributed Secure Servicesに参加" },
+    ],
+    estimatedValue: "$100-600",
+    fundingRaised: "$48M",
+    backers: ["Lightspeed", "Pantera Capital"],
+    website: "https://karak.network",
+    twitter: "@Karak_Network",
+    referralLink: "",
+    referralReward: "",
+    riskLevel: "medium",
+    deadline: "",
+    addedAt: "2026-03-05",
+  },
+];
+
+export function getActiveCampaigns(): readonly AirdropCampaign[] {
+  return CAMPAIGNS.filter((c) => c.status === "active" && !c.tgeCompleted);
+}
+
+export function getCampaignById(id: string): AirdropCampaign | undefined {
+  return CAMPAIGNS.find((c) => c.id === id);
+}
