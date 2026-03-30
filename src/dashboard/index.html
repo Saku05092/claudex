@@ -1276,8 +1276,11 @@
         <ul style="list-style:none;flex:1;margin-bottom:24px;">
           <li style="padding:8px 0;color:var(--text-secondary);font-size:0.9rem;">-- 50+ wallets</li>
           <li style="padding:8px 0;color:var(--text-secondary);font-size:0.9rem;">-- All Pro features</li>
+          <li style="padding:8px 0;color:var(--text-secondary);font-size:0.9rem;">-- Sybil Risk Score analysis</li>
+          <li style="padding:8px 0;color:var(--text-secondary);font-size:0.9rem;">-- Airdrop Value Estimator</li>
+          <li style="padding:8px 0;color:var(--text-secondary);font-size:0.9rem;">-- Portfolio Dashboard</li>
+          <li style="padding:8px 0;color:var(--text-secondary);font-size:0.9rem;">-- Export / Tax Reports</li>
           <li style="padding:8px 0;color:var(--text-secondary);font-size:0.9rem;">-- Unlimited on-chain scans</li>
-          <li style="padding:8px 0;color:var(--text-secondary);font-size:0.9rem;">-- Advanced analytics</li>
           <li style="padding:8px 0;color:var(--text-secondary);font-size:0.9rem;">-- API access</li>
           <li style="padding:8px 0;color:var(--text-secondary);font-size:0.9rem;">-- Dedicated support</li>
         </ul>
@@ -2253,27 +2256,27 @@ function renderAirdrops() {
     return '<div class="airdrop-card ' + tierClass + '">' +
       '<div class="airdrop-card-header">' +
         '<div>' +
-          '<span class="airdrop-card-title">' + a.name + '</span>' +
-          (a.ticker ? '<span class="airdrop-card-ticker">$' + a.ticker + '</span>' : '') +
+          '<span class="airdrop-card-title">' + escapeHtml(a.name) + '</span>' +
+          (a.ticker ? '<span class="airdrop-card-ticker">$' + escapeHtml(a.ticker) + '</span>' : '') +
         '</div>' +
-        '<span class="tier-badge ' + tierBadgeClass + '">Tier ' + a.tier + '</span>' +
+        '<span class="tier-badge ' + tierBadgeClass + '">Tier ' + escapeHtml(a.tier) + '</span>' +
       '</div>' +
-      '<div class="airdrop-card-desc">' + a.description + '</div>' +
+      '<div class="airdrop-card-desc">' + escapeHtml(a.description) + '</div>' +
       '<div class="airdrop-card-badges">' +
-        '<span class="badge badge-category">' + a.category.toUpperCase() + '</span>' +
-        '<span class="badge badge-chain">' + a.chain + '</span>' +
+        '<span class="badge badge-category">' + escapeHtml(a.category.toUpperCase()) + '</span>' +
+        '<span class="badge badge-chain">' + escapeHtml(a.chain) + '</span>' +
         '<span class="status-badge ' + statusClass + '">' + statusLabel + '</span>' +
         referralIndicator +
         tgeIndicator +
       '</div>' +
       '<div class="airdrop-card-stats">' +
-        '<div class="stat"><div class="stat-label">推定価値</div><div class="stat-value">' + a.estimatedValue + '</div></div>' +
-        '<div class="stat"><div class="stat-label">調達額</div><div class="stat-value">' + a.fundingRaised + '</div></div>' +
+        '<div class="stat"><div class="stat-label">推定価値</div><div class="stat-value">' + escapeHtml(a.estimatedValue) + '</div></div>' +
+        '<div class="stat"><div class="stat-label">調達額</div><div class="stat-value">' + escapeHtml(a.fundingRaised) + '</div></div>' +
         '<div class="stat"><div class="stat-label">言及数</div><div class="stat-value">' + a.mentionCount + '</div></div>' +
       '</div>' +
       '<div class="airdrop-card-footer">' +
         '<span class="status-badge ' + statusClass + '">' + statusLabel + '</span>' +
-        '<a class="airdrop-detail-btn" href="#/airdrop/' + a.id + '">Details</a>' +
+        '<a class="airdrop-detail-btn" href="#/airdrop/' + escapeHtml(a.id) + '">Details</a>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -2299,11 +2302,11 @@ function renderAirdropDetail(id) {
   container.innerHTML =
     '<div class="detail-header">' +
       '<div>' +
-        '<h1 class="detail-title">' + a.name + (a.ticker ? '<span class="detail-ticker">$' + a.ticker + '</span>' : '') + '</h1>' +
+        '<h1 class="detail-title">' + escapeHtml(a.name) + (a.ticker ? '<span class="detail-ticker">$' + escapeHtml(a.ticker) + '</span>' : '') + '</h1>' +
         '<div class="detail-badges">' +
-          '<span class="tier-badge ' + tierBadgeClass + '">Tier ' + a.tier + '</span>' +
-          '<span class="badge badge-category">' + a.category.toUpperCase() + '</span>' +
-          '<span class="badge badge-chain">' + a.chain + '</span>' +
+          '<span class="tier-badge ' + tierBadgeClass + '">Tier ' + escapeHtml(a.tier) + '</span>' +
+          '<span class="badge badge-category">' + escapeHtml(a.category.toUpperCase()) + '</span>' +
+          '<span class="badge badge-chain">' + escapeHtml(a.chain) + '</span>' +
           '<span class="status-badge ' + statusClass + '">' + statusLabel + '</span>' +
         '</div>' +
       '</div>' +
@@ -2313,36 +2316,36 @@ function renderAirdropDetail(id) {
       '<div class="detail-main">' +
         '<div class="detail-section">' +
           '<h3>概要</h3>' +
-          '<p>' + a.description + '</p>' +
+          '<p>' + escapeHtml(a.description) + '</p>' +
         '</div>' +
 
         '<div class="detail-section">' +
           '<h3>タスク</h3>' +
           '<ul class="task-list">' +
-            a.tasks.map(function(t) { return '<li class="task-item">' + t + '</li>'; }).join('') +
+            a.tasks.map(function(t) { return '<li class="task-item">' + escapeHtml(t) + '</li>'; }).join('') +
           '</ul>' +
         '</div>' +
 
         '<div class="detail-section">' +
           '<h3>バッカー / 投資家</h3>' +
           '<div class="mention-list">' +
-            a.backers.map(function(b) { return '<span class="mention-tag">' + b + '</span>'; }).join('') +
+            a.backers.map(function(b) { return '<span class="mention-tag">' + escapeHtml(b) + '</span>'; }).join('') +
           '</div>' +
         '</div>' +
 
         '<div class="detail-section">' +
           '<h3>言及したインフルエンサー (' + a.mentionCount + '回言及)</h3>' +
           '<div class="mention-list">' +
-            a.mentionedBy.map(function(m) { return '<span class="mention-tag">' + m + '</span>'; }).join('') +
+            a.mentionedBy.map(function(m) { return '<span class="mention-tag">' + escapeHtml(m) + '</span>'; }).join('') +
           '</div>' +
         '</div>' +
 
         '<div class="detail-section">' +
           '<h3>リンク</h3>' +
           '<div class="detail-links">' +
-            '<a href="' + ctaUrl + '" target="_blank" rel="noopener noreferrer" class="detail-link detail-link-primary">' + ctaLabel + '</a>' +
-            '<a href="' + a.website + '" target="_blank" rel="noopener noreferrer" class="detail-link detail-link-secondary">Website</a>' +
-            '<a href="https://twitter.com/' + a.twitter.replace('@', '') + '" target="_blank" rel="noopener noreferrer" class="detail-link detail-link-secondary">' + a.twitter + '</a>' +
+            '<a href="' + escapeHtml(ctaUrl) + '" target="_blank" rel="noopener noreferrer" class="detail-link detail-link-primary">' + ctaLabel + '</a>' +
+            '<a href="' + escapeHtml(a.website) + '" target="_blank" rel="noopener noreferrer" class="detail-link detail-link-secondary">Website</a>' +
+            '<a href="https://twitter.com/' + escapeHtml(a.twitter.replace('@', '')) + '" target="_blank" rel="noopener noreferrer" class="detail-link detail-link-secondary">' + escapeHtml(a.twitter) + '</a>' +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -2350,10 +2353,10 @@ function renderAirdropDetail(id) {
       '<div class="detail-sidebar">' +
         '<div class="detail-section">' +
           '<h3>基本情報</h3>' +
-          '<div class="detail-info-row"><span class="detail-info-label">推定価値</span><span class="detail-info-value">' + a.estimatedValue + '</span></div>' +
-          '<div class="detail-info-row"><span class="detail-info-label">調達額</span><span class="detail-info-value">' + a.fundingRaised + '</span></div>' +
-          '<div class="detail-info-row"><span class="detail-info-label">追加日</span><span class="detail-info-value">' + a.addedAt + '</span></div>' +
-          (a.deadline ? '<div class="detail-info-row"><span class="detail-info-label">締切</span><span class="detail-info-value">' + a.deadline + '</span></div>' : '') +
+          '<div class="detail-info-row"><span class="detail-info-label">推定価値</span><span class="detail-info-value">' + escapeHtml(a.estimatedValue) + '</span></div>' +
+          '<div class="detail-info-row"><span class="detail-info-label">調達額</span><span class="detail-info-value">' + escapeHtml(a.fundingRaised) + '</span></div>' +
+          '<div class="detail-info-row"><span class="detail-info-label">追加日</span><span class="detail-info-value">' + escapeHtml(a.addedAt) + '</span></div>' +
+          (a.deadline ? '<div class="detail-info-row"><span class="detail-info-label">締切</span><span class="detail-info-value">' + escapeHtml(a.deadline) + '</span></div>' : '') +
         '</div>' +
 
         '<div class="detail-section">' +
@@ -2553,7 +2556,7 @@ function runDiscovery(mode) {
       var lines = [];
       if (data.results) {
         data.results.forEach(function(r) {
-          lines.push('<b>[' + r.mode + ']</b> Evaluated: ' + r.evaluated + ' | Registered: ' + r.registered + ' | Skipped: ' + r.skipped);
+          lines.push('<b>[' + escapeHtml(r.mode) + ']</b> Evaluated: ' + r.evaluated + ' | Registered: ' + r.registered + ' | Skipped: ' + r.skipped);
           r.campaigns.forEach(function(c) {
             var icon = c.action === 'registered' ? '+' : c.action === 'exists' ? '=' : '-';
             lines.push('  ' + icon + ' ' + escapeHtml(c.name) + ': ' + escapeHtml(c.reason));
@@ -2610,7 +2613,7 @@ function runMonitor(mode) {
       var lines = [];
       if (data.results) {
         data.results.forEach(function(r) {
-          lines.push(r.runType + ': ' + r.tweetsFound + ' found, ' + r.tweetsNew + ' new (' + r.estimatedCost + ')');
+          lines.push(escapeHtml(r.runType) + ': ' + r.tweetsFound + ' found, ' + r.tweetsNew + ' new (' + escapeHtml(r.estimatedCost) + ')');
         });
       }
       if (data.summary) {
@@ -2725,7 +2728,7 @@ function renderMonitorTweets(tweets) {
           ' <span style="color:var(--text-muted); font-size:0.82rem;">' + escapeHtml(t.authorName) + '</span>' +
         '</div>' +
         '<div style="display:flex; gap:8px; align-items:center;">' +
-          '<span style="font-size:0.72rem; padding:2px 8px; border-radius:8px; border:1px solid ' + sourceColor + '; color:' + sourceColor + ';">' + t.sourceType + '</span>' +
+          '<span style="font-size:0.72rem; padding:2px 8px; border-radius:8px; border:1px solid ' + sourceColor + '; color:' + sourceColor + ';">' + escapeHtml(t.sourceType) + '</span>' +
           '<span style="font-size:0.78rem; color:var(--text-muted);">' + date + '</span>' +
         '</div>' +
       '</div>' +
@@ -2741,7 +2744,12 @@ function renderMonitorTweets(tweets) {
 
 function escapeHtml(str) {
   if (!str) return '';
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 function formatNumber(n) {
@@ -2780,7 +2788,10 @@ function renderPricingTable() {
     { name: 'Wallet Comparison', free: '--', pro: 'Yes', unlimited: 'Yes' },
     { name: 'Protocol History', free: '--', pro: 'Yes', unlimited: 'Yes' },
     { name: 'Gas Cost Tracking', free: '--', pro: 'Yes', unlimited: 'Yes' },
-    { name: 'Advanced Analytics', free: '--', pro: '--', unlimited: 'Yes' },
+    { name: 'Sybil Risk Score', free: '--', pro: '--', unlimited: 'Yes' },
+    { name: 'Airdrop Value Estimator', free: '--', pro: '--', unlimited: 'Yes' },
+    { name: 'Portfolio Dashboard', free: '--', pro: '--', unlimited: 'Yes' },
+    { name: 'Export / Tax Reports', free: '--', pro: '--', unlimited: 'Yes' },
     { name: 'API Access', free: '--', pro: '--', unlimited: 'Yes' },
     { name: 'Support', free: 'Community', pro: 'Priority', unlimited: 'Dedicated' },
   ];

@@ -37,6 +37,29 @@ const PORT = Number(process.env.CLAUDEX_API_PORT ?? 3001);
 const BEARER_TOKEN = process.env.TWITTER_BEARER_TOKEN ?? "";
 const CLAUDE_API_KEY = process.env.ANTHROPIC_API_KEY ?? "";
 const MAX_RESULTS = Number(process.env.TWITTER_MONITOR_MAX_RESULTS ?? 10);
+const API_SECRET = process.env.CLAUDEX_API_SECRET ?? "";
+
+if (!API_SECRET) {
+  console.warn("[Claudex API] WARNING: CLAUDEX_API_SECRET not set. POST endpoints are unprotected (dev mode).");
+}
+
+function requireAuth(req: IncomingMessage): { authorized: boolean; response?: { body: string; status: number; headers: Record<string, string> } } {
+  if (!API_SECRET) {
+    return { authorized: true };
+  }
+
+  const authHeader = req.headers["authorization"] ?? "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+
+  if (token !== API_SECRET) {
+    return {
+      authorized: false,
+      response: jsonResponse({ error: "Unauthorized" }, 401),
+    };
+  }
+
+  return { authorized: true };
+}
 
 const db = createDatabase();
 const analyzer = createTweetAnalyzer(db);
@@ -67,7 +90,7 @@ function jsonResponse(data: unknown, status: number = 200): { body: string; stat
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
     },
   };
 }
@@ -257,7 +280,7 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
     res.writeHead(204, {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
     });
     res.end();
     return;
@@ -265,6 +288,12 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
 
   // POST endpoints
   if (req.method === "POST") {
+    const auth = requireAuth(req);
+    if (!auth.authorized) {
+      sendResponse(res, auth.response!);
+      return;
+    }
+
     const monitorModes: Record<string, "keyword" | "influencer" | "both"> = {
       "/api/monitor/run/keyword": "keyword",
       "/api/monitor/run/influencer": "influencer",

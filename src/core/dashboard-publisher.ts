@@ -160,5 +160,10 @@ function slugify(name: string): string {
 }
 
 function escapeStr(s: string): string {
-  return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, " ");
+  return s
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, " ")
+    .replace(/</g, "\\x3c")
+    .replace(/>/g, "\\x3e");
 }
