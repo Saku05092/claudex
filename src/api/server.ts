@@ -467,7 +467,98 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
       return;
     }
 
+    // Auto Post endpoint
+    if (url.pathname === "/api/autopost") {
+      collectRequestBody(req).then(async (bodyStr) => {
+        try {
+          const body = JSON.parse(bodyStr);
+          const pattern = body.pattern || "news";
+
+          if (!CLAUDE_API_KEY) {
+            sendResponse(res, jsonResponse({ error: "ANTHROPIC_API_KEY not configured" }, 500));
+            return;
+          }
+
+          const { createContentPipeline } = await import("../core/content-pipeline.js");
+          const pipeline = createContentPipeline({
+            anthropicApiKey: CLAUDE_API_KEY,
+            twitterConfig: BEARER_TOKEN ? {
+              apiKey: process.env.TWITTER_API_KEY ?? "",
+              apiSecret: process.env.TWITTER_API_SECRET ?? "",
+              accessToken: process.env.TWITTER_ACCESS_TOKEN ?? "",
+              accessTokenSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET ?? "",
+            } : undefined,
+          });
+
+          const draft = await pipeline.generateDraft(pattern, pattern);
+          const result = await pipeline.postDraft(draft.id);
+          pipeline.close();
+
+          sendResponse(res, jsonResponse({
+            status: "posted",
+            pattern,
+            text: result.draft.text.substring(0, 100),
+            results: result.results,
+          }));
+        } catch (error: unknown) {
+          const msg = error instanceof Error ? error.message : String(error);
+          sendResponse(res, jsonResponse({ error: msg }, 500));
+        }
+      }).catch((err) => {
+        sendResponse(res, jsonResponse({ error: String(err) }, 500));
+      });
+      return;
+    }
+
+    // Referral Scan endpoint
+    if (url.pathname === "/api/referrals/scan") {
+      collectRequestBody(req).then(async (bodyStr) => {
+        try {
+          const body = JSON.parse(bodyStr);
+          const mode = body.mode || "scan";
+
+          const { createReferralDetector } = await import("../core/referral-detector.js");
+          const detector = createReferralDetector();
+          const scanResult = await detector.scanForNewReferrals();
+
+          let registered = 0;
+          if (mode === "auto") {
+            const regResult = detector.autoRegisterReferrals(scanResult.detected);
+            registered = regResult.registered;
+          }
+
+          sendResponse(res, jsonResponse({
+            status: "completed",
+            mode,
+            found: scanResult.detected.length,
+            registered,
+            results: scanResult.detected.slice(0, 10).map((r) => ({
+              name: r.campaignName,
+              url: r.referralUrl,
+              source: r.source,
+              confidence: r.confidence,
+            })),
+          }));
+        } catch (error: unknown) {
+          const msg = error instanceof Error ? error.message : String(error);
+          sendResponse(res, jsonResponse({ error: msg }, 500));
+        }
+      }).catch((err) => {
+        sendResponse(res, jsonResponse({ error: String(err) }, 500));
+      });
+      return;
+    }
+
     sendResponse(res, jsonResponse({ error: "Not found" }, 404));
+    return;
+  }
+
+  // GET: Posts recent
+  if (url.pathname === "/api/posts/recent") {
+    const rows = db
+      .prepare("SELECT * FROM scheduled_posts WHERE status = 'posted' ORDER BY posted_at DESC LIMIT 20")
+      .all() as readonly Record<string, unknown>[];
+    sendResponse(res, jsonResponse({ posts: rows }));
     return;
   }
 
