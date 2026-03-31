@@ -217,18 +217,18 @@ npx tsx scripts/verify-claude.ts               # Check Claude API
 - [x] 投稿履歴・分析DB (recordPost, getPostStats, getPostsByDate)
 - [ ] note.comブログ連携
 
-### Phase 3: Web Dashboard Enhancement [NOT STARTED]
-- [ ] ドメイン取得・デプロイ (Vercel or Cloudflare Pages)
-- [ ] リファーラルトラッキング (UTM計測実装)
-- [ ] Linktree/link-in-bio ページ
-- [ ] SEO最適化
+### Phase 3: Web Dashboard Enhancement [COMPLETED]
+- [x] リファーラルトラッキング (UTM計測 + /api/redirect/:id クリック記録)
+- [x] Linktree/link-in-bio ページ (/links, 5リンク, UTM追跡)
+- [x] SEO最適化 (OG tags, Twitter Card, description, keywords)
+- [ ] ドメイン取得・デプロイ (Vercel or Cloudflare Pages) *外部セットアップ待ち*
 - [ ] note.comブログ連携
 
-### Phase 4: Full Automation & Scaling [NOT STARTED]
-- [ ] 投稿の完全自動化 (スケジューラ + 承認レス)
-- [ ] 新規リファーラルプログラム自動検出
-- [ ] クラウド移行 (Railway)
-- [ ] 収益ダッシュボード
+### Phase 4: Full Automation & Scaling [COMPLETED]
+- [x] 投稿の完全自動化 (cron 2h間隔, JST 8-23, 曜日別パターン)
+- [x] 新規リファーラルプログラム自動検出 (DeFiLlama + Twitter並列スキャン)
+- [x] 収益ダッシュボード (SQLite, /api/revenue/summary, 月次/プラットフォーム別)
+- [ ] クラウド移行 (Railway) *外部セットアップ待ち*
 - [ ] A/Bテスト
 - [ ] フォロワー成長分析
 
