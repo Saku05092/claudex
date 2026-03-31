@@ -219,19 +219,29 @@ npx tsx scripts/verify-claude.ts               # Check Claude API
 
 ### Phase 3: Web Dashboard Enhancement [NOT STARTED]
 - [ ] ドメイン取得・デプロイ (Vercel or Cloudflare Pages)
-- [ ] リファーラルトラッキング (UTM)
+- [ ] リファーラルトラッキング (UTM計測実装)
 - [ ] Linktree/link-in-bio ページ
 - [ ] SEO最適化
-- [ ] カード比較リアルタイム更新
-- [ ] ユーザーレビュー機能
+- [ ] note.comブログ連携
 
 ### Phase 4: Full Automation & Scaling [NOT STARTED]
-- [ ] 投稿の完全自動化 (承認フロー不要)
-- [ ] A/Bテスト
-- [ ] フォロワー成長分析
+- [ ] 投稿の完全自動化 (スケジューラ + 承認レス)
 - [ ] 新規リファーラルプログラム自動検出
 - [ ] クラウド移行 (Railway)
 - [ ] 収益ダッシュボード
+- [ ] A/Bテスト
+- [ ] フォロワー成長分析
+
+### Backlog: Bug Fixes / Improvements (from audit)
+- [ ] Telegram HTML属性サニタイズ
+- [ ] Discord Bot権限チェック追加
+- [ ] Instagram APIエラーハンドリング
+- [ ] DB接続シングルトン化 (referral-manager, post-history)
+- [ ] Claude/AI出力のZodバリデーション
+- [ ] tweet-analyzer メモリ制限 (LIMIT追加)
+- [ ] ダッシュボードHTML分割 (2900行)
+- [ ] Telegram Bot セットアップ
+- [ ] Discord Bot セットアップ
 
 ---
 
