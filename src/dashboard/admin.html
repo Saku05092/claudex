@@ -316,18 +316,21 @@
     <!-- ============================================================ -->
     <!-- MONITOR CONTROLS -->
     <!-- ============================================================ -->
-    <h2 class="section-title">Monitor Controls</h2>
+    <h2 class="section-title">Twitter Monitor &amp; Discovery</h2>
     <div class="panel">
-      <h3>Search & Monitor</h3>
+      <h3>Twitter Search</h3>
+      <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:12px;">Twitter APIでエアドロップ関連ツイートを収集し、トレンドプロジェクトやインフルエンサーを分析します。</p>
       <div class="btn-group" style="margin-bottom:12px;">
-        <button id="btn-run-keyword" class="btn btn-primary" onclick="runMonitor('keyword')">Keyword Search</button>
-        <button id="btn-run-influencer" class="btn btn-primary" onclick="runMonitor('influencer')">Influencer Search</button>
-        <button id="btn-run-both" class="btn btn-green" onclick="runMonitor('both')">Run Both</button>
+        <button id="btn-run-keyword" class="btn btn-primary" onclick="runMonitor('keyword')" title="airdrop, DeFi等のキーワードでTwitterを検索">Keyword Search</button>
+        <button id="btn-run-influencer" class="btn btn-primary" onclick="runMonitor('influencer')" title="登録済み54名のインフルエンサーの最新ツイートを取得">Influencer Search</button>
+        <button id="btn-run-both" class="btn btn-green" onclick="runMonitor('both')" title="キーワード検索+インフルエンサー検索を同時実行">Run Both</button>
       </div>
+      <h3 style="margin-top:16px;">Discovery Pipeline</h3>
+      <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:12px;">収集したデータから新規エアドロップ案件を自動検出し、ダッシュボードに登録します。</p>
       <div class="btn-group">
-        <button id="btn-discovery-tweet" class="btn btn-secondary" onclick="runDiscovery('tweets')">Discover (Tweets)</button>
-        <button id="btn-discovery-defilama" class="btn btn-secondary" onclick="runDiscovery('defillama')">Discover (DeFiLlama)</button>
-        <button id="btn-discovery-all" class="btn btn-yellow" onclick="runDiscovery('all')">Discover All</button>
+        <button id="btn-discovery-tweet" class="btn btn-secondary" onclick="runDiscovery('tweets')" title="収集済みツイートから未登録のプロジェクトを検出">Discover (Tweets)</button>
+        <button id="btn-discovery-defilama" class="btn btn-secondary" onclick="runDiscovery('defillama')" title="DeFiLlamaから新規プロトコル(TVL $100K+, 直近7日)を検出">Discover (DeFiLlama)</button>
+        <button id="btn-discovery-all" class="btn btn-yellow" onclick="runDiscovery('all')" title="Tweet + DeFiLlama両方の検出を同時実行">Discover All</button>
       </div>
       <div style="margin-top:16px;">
         <div id="monitor-run-status" style="font-size:0.88rem; color:var(--text-muted);">Ready</div>
@@ -343,40 +346,44 @@
 
       <!-- Auto Post -->
       <div class="panel">
-        <h3>Auto Post</h3>
+        <h3>Auto Post (@mochi_d3fi)</h3>
+        <p style="color:var(--text-muted); font-size:0.82rem; margin-bottom:10px;">Claude Haikuでツイートを生成し、@mochi_d3fiから自動投稿します。パターンを選択してください。</p>
         <div class="btn-group">
-          <button class="btn btn-primary" onclick="runAutoPost('experience')">Experience</button>
-          <button class="btn btn-primary" onclick="runAutoPost('educational')">Educational</button>
-          <button class="btn btn-primary" onclick="runAutoPost('roundup')">Roundup</button>
-          <button class="btn btn-primary" onclick="runAutoPost('news')">News</button>
+          <button class="btn btn-primary" onclick="runAutoPost('experience')" title="DeFiプロトコルを使ってみた体験をシェア。リファーラルリンク付き">Experience (体験共有)</button>
+          <button class="btn btn-primary" onclick="runAutoPost('educational')" title="DeFi初心者向けの教育投稿。リファーラルなし(信頼構築)">Educational (教育)</button>
+          <button class="btn btn-primary" onclick="runAutoPost('roundup')" title="今週のエアドロップ案件をまとめて紹介。中立的">Roundup (週間まとめ)</button>
+          <button class="btn btn-primary" onclick="runAutoPost('news')" title="最新のクリプトニュースにコメント。Claude活用を言及">News (ニュース)</button>
         </div>
         <div id="autopost-result" class="panel-result">--</div>
       </div>
 
       <!-- Referral Detection -->
       <div class="panel">
-        <h3>Referral Detection</h3>
+        <h3>Referral Program Detection</h3>
+        <p style="color:var(--text-muted); font-size:0.82rem; margin-bottom:10px;">DeFiLlamaの新規プロトコル + Twitterトレンドから、リファーラルプログラムを実施中のプロジェクトを自動検出します。</p>
         <div class="btn-group">
-          <button class="btn btn-secondary" onclick="runReferralScan('scan')">Scan</button>
-          <button class="btn btn-green" onclick="runReferralScan('auto')">Auto Register</button>
+          <button class="btn btn-secondary" onclick="runReferralScan('scan')" title="スキャンのみ。結果を表示するが自動登録はしない">Scan Only (検出のみ)</button>
+          <button class="btn btn-green" onclick="runReferralScan('auto')" title="高信頼度の案件を自動でダッシュボードに登録">Auto Register (自動登録)</button>
         </div>
         <div id="referral-scan-result" class="panel-result">--</div>
       </div>
 
       <!-- Revenue -->
       <div class="panel">
-        <h3>Revenue</h3>
+        <h3>Revenue Dashboard</h3>
+        <p style="color:var(--text-muted); font-size:0.82rem; margin-bottom:10px;">リファーラル収益の合計、クリック数、登録数を表示します。</p>
         <div class="btn-group">
-          <button class="btn btn-secondary" onclick="loadRevenue()">Load Summary</button>
+          <button class="btn btn-secondary" onclick="loadRevenue()" title="収益サマリー(合計収益、クリック、登録数)を読み込み">Load Summary</button>
         </div>
         <div id="revenue-result" class="panel-result">--</div>
       </div>
 
       <!-- Click Tracking -->
       <div class="panel">
-        <h3>Click Tracking</h3>
+        <h3>UTM Click Analytics</h3>
+        <p style="color:var(--text-muted); font-size:0.82rem; margin-bottom:10px;">リファーラルリンクのUTMクリック統計。どのプラットフォームから何回クリックされたかを計測します。</p>
         <div class="btn-group">
-          <button class="btn btn-secondary" onclick="loadClickStats()">Load Stats</button>
+          <button class="btn btn-secondary" onclick="loadClickStats()" title="クリック統計(合計、本日、トップキャンペーン)を読み込み">Load Stats</button>
         </div>
         <div id="clicks-result" class="panel-result">--</div>
       </div>
@@ -384,17 +391,19 @@
       <!-- Post History -->
       <div class="panel">
         <h3>Post History</h3>
+        <p style="color:var(--text-muted); font-size:0.82rem; margin-bottom:10px;">@mochi_d3fiの最近の投稿一覧を表示します。</p>
         <div class="btn-group">
-          <button class="btn btn-secondary" onclick="loadPostHistory()">Load History</button>
+          <button class="btn btn-secondary" onclick="loadPostHistory()" title="直近5件の投稿(プラットフォーム、内容)を表示">Load History</button>
         </div>
         <div id="post-history-result" class="panel-result">--</div>
       </div>
 
       <!-- Full Auto -->
       <div class="panel">
-        <h3>Full Auto</h3>
+        <h3>Full Auto (一括実行)</h3>
+        <p style="color:var(--text-muted); font-size:0.82rem; margin-bottom:10px;">Twitter Monitor + Discovery Pipelineを全て一括実行します。新規ツイート収集、案件検出、トレンド分析を同時に行います。</p>
         <div class="btn-group">
-          <button class="btn btn-red" onclick="runFullAuto()">Run All</button>
+          <button class="btn btn-red" onclick="runFullAuto()" title="Monitor (Keyword+Influencer) + Discovery (All) を同時実行">Run All</button>
         </div>
         <div id="full-auto-result" class="panel-result">--</div>
       </div>
