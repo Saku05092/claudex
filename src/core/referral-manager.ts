@@ -1,5 +1,6 @@
 import { createDatabase } from "./database.js";
 import { CAMPAIGNS, type AirdropCampaign } from "../api/data.js";
+import type Database from "better-sqlite3";
 
 type Platform = "twitter" | "telegram" | "discord" | "instagram" | "web";
 type UtmContent = "tweet" | "post" | "story" | "cta";
@@ -16,14 +17,17 @@ interface ClickStats {
   readonly clicksByPlatform: Readonly<Record<string, number>>;
 }
 
-function getDb() {
-  return createDatabase();
+let _db: Database.Database | null = null;
+function getDb(): Database.Database {
+  if (!_db) {
+    _db = createDatabase();
+  }
+  return _db;
 }
 
 export function setReferralLink(campaignId: string, url: string): void {
   const db = getDb();
-  try {
-    const existing = db
+  const existing = db
       .prepare("SELECT id FROM campaigns WHERE id = ?")
       .get(campaignId);
 
@@ -66,64 +70,53 @@ export function setReferralLink(campaignId: string, url: string): void {
         hardcoded.addedAt
       );
     }
-  } finally {
-    db.close();
-  }
 }
 
 export function getReferralLink(campaignId: string): string | undefined {
   const db = getDb();
-  try {
-    const row = db
-      .prepare("SELECT referral_link FROM campaigns WHERE id = ?")
-      .get(campaignId) as { referral_link: string } | undefined;
+  const row = db
+    .prepare("SELECT referral_link FROM campaigns WHERE id = ?")
+    .get(campaignId) as { referral_link: string } | undefined;
 
-    if (row?.referral_link) {
-      return row.referral_link;
-    }
-
-    const hardcoded = CAMPAIGNS.find((c) => c.id === campaignId);
-    return hardcoded?.referralLink || undefined;
-  } finally {
-    db.close();
+  if (row?.referral_link) {
+    return row.referral_link;
   }
+
+  const hardcoded = CAMPAIGNS.find((c) => c.id === campaignId);
+  return hardcoded?.referralLink || undefined;
 }
 
 export function getAllReferralLinks(): readonly ReferralEntry[] {
   const db = getDb();
-  try {
-    const dbRows = db
-      .prepare(
-        "SELECT id, name, referral_link FROM campaigns WHERE referral_link IS NOT NULL AND referral_link != ''"
-      )
-      .all() as readonly { id: string; name: string; referral_link: string }[];
+  const dbRows = db
+    .prepare(
+      "SELECT id, name, referral_link FROM campaigns WHERE referral_link IS NOT NULL AND referral_link != ''"
+    )
+    .all() as readonly { id: string; name: string; referral_link: string }[];
 
-    const dbMap = new Map(dbRows.map((r) => [r.id, r]));
+  const dbMap = new Map(dbRows.map((r) => [r.id, r]));
 
-    const merged: ReferralEntry[] = [];
+  const merged: ReferralEntry[] = [];
 
-    for (const row of dbRows) {
+  for (const row of dbRows) {
+    merged.push({
+      campaignId: row.id,
+      campaignName: row.name,
+      referralLink: row.referral_link,
+    });
+  }
+
+  for (const campaign of CAMPAIGNS) {
+    if (campaign.referralLink && !dbMap.has(campaign.id)) {
       merged.push({
-        campaignId: row.id,
-        campaignName: row.name,
-        referralLink: row.referral_link,
+        campaignId: campaign.id,
+        campaignName: campaign.name,
+        referralLink: campaign.referralLink,
       });
     }
-
-    for (const campaign of CAMPAIGNS) {
-      if (campaign.referralLink && !dbMap.has(campaign.id)) {
-        merged.push({
-          campaignId: campaign.id,
-          campaignName: campaign.name,
-          referralLink: campaign.referralLink,
-        });
-      }
-    }
-
-    return merged;
-  } finally {
-    db.close();
   }
+
+  return merged;
 }
 
 export function buildReferralUrl(
@@ -165,23 +158,19 @@ export function getClickStats(campaignId: string): ClickStats {
 
 export function getCampaignsWithReferrals(): readonly AirdropCampaign[] {
   const db = getDb();
-  try {
-    const dbRows = db
-      .prepare(
-        "SELECT id, referral_link FROM campaigns WHERE referral_link IS NOT NULL AND referral_link != ''"
-      )
-      .all() as readonly { id: string; referral_link: string }[];
+  const dbRows = db
+    .prepare(
+      "SELECT id, referral_link FROM campaigns WHERE referral_link IS NOT NULL AND referral_link != ''"
+    )
+    .all() as readonly { id: string; referral_link: string }[];
 
-    const referralMap = new Map(dbRows.map((r) => [r.id, r.referral_link]));
+  const referralMap = new Map(dbRows.map((r) => [r.id, r.referral_link]));
 
-    return CAMPAIGNS.map((campaign) => {
-      const dbLink = referralMap.get(campaign.id);
-      if (dbLink) {
-        return { ...campaign, referralLink: dbLink };
-      }
-      return campaign;
-    });
-  } finally {
-    db.close();
-  }
+  return CAMPAIGNS.map((campaign) => {
+    const dbLink = referralMap.get(campaign.id);
+    if (dbLink) {
+      return { ...campaign, referralLink: dbLink };
+    }
+    return campaign;
+  });
 }

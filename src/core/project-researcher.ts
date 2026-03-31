@@ -1,6 +1,30 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { z } from "zod";
 import { fetchAllProtocols } from "../scrapers/defilama.js";
 import { checkForReferralProgram } from "../scrapers/defilama.js";
+
+const ProjectResearchSchema = z.object({
+  name: z.string().default(""),
+  ticker: z.string().default(""),
+  category: z.string().default("other"),
+  chain: z.string().default("unknown"),
+  description: z.string().default(""),
+  descriptionEn: z.string().default(""),
+  tier: z.enum(["S", "A", "B", "C"]).default("C"),
+  status: z.enum(["active", "upcoming", "ended"]).default("active"),
+  tgeCompleted: z.boolean().default(false),
+  tasks: z.array(z.string()).default([]),
+  estimatedValue: z.string().default("unknown"),
+  fundingRaised: z.string().default("unknown"),
+  backers: z.array(z.string()).default([]),
+  website: z.string().default(""),
+  twitter: z.string().default(""),
+  referralReward: z.string().default(""),
+  riskLevel: z.enum(["low", "medium", "high"]).default("high"),
+  mentionCount: z.number().default(0),
+  suitable: z.boolean().default(false),
+  reason: z.string().default(""),
+});
 
 /**
  * Research result from investigating a project
@@ -178,7 +202,7 @@ Only return the JSON object, nothing else.`,
     const text = jsonMatch ? jsonMatch[1].trim() : rawText.trim();
 
     try {
-      const parsed = JSON.parse(text);
+      const parsed = ProjectResearchSchema.parse(JSON.parse(text));
       return {
         ...parsed,
         referralLink: referralInfo.referralUrl ?? "",

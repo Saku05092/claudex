@@ -74,11 +74,20 @@ export function createTelegramBot(token: string) {
   return { postToChannel, postImageToChannel, start, stop };
 }
 
+function escapeHtmlAttr(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/'/g, "&#039;");
+}
+
 function formatTelegramMessage(content: GeneratedContent): string {
   const parts: string[] = [content.text];
 
   if (content.referralLink) {
-    parts.push(`\n\n<a href="${content.referralLink}">Details</a>`);
+    parts.push(`\n\n<a href="${escapeHtmlAttr(content.referralLink ?? "")}">Details</a>`);
   }
 
   if (content.hashtags.length > 0) {

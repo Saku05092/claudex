@@ -54,6 +54,10 @@ export function createInstagramClient(config: InstagramConfig) {
       }
     );
 
+    if (!carouselResponse.ok) {
+      throw new Error(`Instagram API error: ${carouselResponse.status} ${await carouselResponse.text()}`);
+    }
+
     const carouselData = await carouselResponse.json();
 
     // Step 3: Publish
@@ -101,6 +105,10 @@ async function createMediaContainer(
     { method: "POST" }
   );
 
+  if (!response.ok) {
+    throw new Error(`Instagram API error: ${response.status} ${await response.text()}`);
+  }
+
   const data = await response.json();
   return data.id;
 }
@@ -110,6 +118,10 @@ async function publishMedia(containerId: string): Promise<string> {
     `${GRAPH_API_BASE}/me/media_publish?creation_id=${containerId}`,
     { method: "POST" }
   );
+
+  if (!response.ok) {
+    throw new Error(`Instagram API error: ${response.status} ${await response.text()}`);
+  }
 
   const data = await response.json();
   return data.id;

@@ -52,6 +52,17 @@ export function createDiscordPipeline(config: DiscordPipelineConfig) {
     const command = parts[0].toLowerCase();
     const args = parts.slice(1).join(" ").trim();
 
+    // Permission check: only admins or server owner can run commands other than help
+    const isAdmin = message.member?.permissions.has("Administrator") ?? false;
+    const isOwner = message.guild?.ownerId === message.author.id;
+
+    if (!isAdmin && !isOwner) {
+      if (command !== "help") {
+        await message.reply("Insufficient permissions. Admin or server owner required.");
+        return;
+      }
+    }
+
     switch (command) {
       case "research":
         await handleResearch(message, args, false);

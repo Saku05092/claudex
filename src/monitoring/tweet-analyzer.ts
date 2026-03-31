@@ -113,7 +113,7 @@ export function createTweetAnalyzer(db: Database.Database) {
 
   function getTrendingProjects(limit: number = 15): readonly TrendingProject[] {
     const rows = db.prepare(
-      "SELECT tweet_id, author_username, text, like_count, retweet_count, tweeted_at FROM collected_tweets ORDER BY tweeted_at DESC"
+      "SELECT tweet_id, author_username, text, like_count, retweet_count, tweeted_at FROM collected_tweets WHERE tweeted_at > datetime('now', '-30 days') ORDER BY tweeted_at DESC LIMIT 1000"
     ).all() as readonly {
       tweet_id: string;
       author_username: string;
@@ -267,7 +267,7 @@ export function createTweetAnalyzer(db: Database.Database) {
     const airdropKeywords = /airdrop|エアドロ|testnet|points|ポイント|TGE|token|farming|claim/i;
 
     const rows = db.prepare(
-      "SELECT text FROM collected_tweets"
+      "SELECT text FROM collected_tweets WHERE tweeted_at > datetime('now', '-30 days') ORDER BY tweeted_at DESC LIMIT 1000"
     ).all() as readonly { text: string }[];
 
     const candidates = new Map<string, { count: number; samples: string[] }>();
