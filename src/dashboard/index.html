@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Claudex Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <meta name="description" content="Japan's airdrop navigator. Compare crypto cards, track DeFi airdrops, and manage referral campaigns. DYOR - NFA.">
 <meta name="keywords" content="airdrop, DeFi, crypto, card comparison, Japan, エアドロップ, 仮想通貨">
 <meta property="og:title" content="Claudex - Airdrop Navigator">
@@ -975,6 +976,13 @@
     <a class="nav-link" href="#/monitor" data-page="monitor">Monitor</a>
     <a class="nav-link" href="#/pricing" data-page="pricing">Pricing</a>
     <a class="nav-link" href="https://discord.gg/airhunt" target="_blank" rel="noopener">Discord</a>
+    <span id="nav-auth-area" style="margin-left:auto;">
+      <a id="nav-login-btn" class="nav-link" href="#/login" style="display:inline;">Login</a>
+      <span id="nav-user-info" style="display:none;color:var(--text-secondary);font-size:0.85rem;">
+        <span id="nav-user-email"></span>
+        <a href="#" onclick="handleLogout();return false;" style="color:var(--accent-red,#EF4444);margin-left:8px;text-decoration:none;font-weight:600;font-size:0.8rem;">Logout</a>
+      </span>
+    </span>
   </div>
 </nav>
 
@@ -1381,6 +1389,33 @@
       After signup, download AirHunt app and login with the same credentials.
       DYOR - NFA. AirHunt does not provide financial advice.
     </p>
+  </div>
+</div>
+
+<!-- Page: Login -->
+<div class="page" id="page-login">
+  <div class="container" style="max-width:480px;margin:0 auto;padding:60px 24px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <h1 style="font-size:1.8rem;font-weight:800;color:var(--text-primary);">Welcome Back</h1>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-top:8px;">Sign in to your AirHunt account</p>
+    </div>
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:32px;">
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:6px;font-weight:600;">Email</label>
+        <input id="login-email" type="email" placeholder="your@email.com" style="width:100%;padding:12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-size:0.95rem;outline:none;box-sizing:border-box;" />
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:6px;font-weight:600;">Password</label>
+        <input id="login-password" type="password" placeholder="Password" style="width:100%;padding:12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-size:0.95rem;outline:none;box-sizing:border-box;" />
+      </div>
+      <button id="login-btn" onclick="handleLogin()" style="width:100%;padding:14px;background:#7C3AED;border:none;border-radius:10px;color:white;font-size:1rem;font-weight:700;cursor:pointer;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+        Sign In
+      </button>
+      <p id="login-error" style="color:#EF4444;font-size:0.85rem;text-align:center;margin-top:12px;display:none;"></p>
+      <p style="text-align:center;margin-top:16px;color:var(--text-muted);font-size:0.85rem;">
+        New here? <a href="#/signup" style="color:#7C3AED;text-decoration:none;font-weight:600;">Create Account</a>
+      </p>
+    </div>
   </div>
 </div>
 
@@ -2925,8 +2960,193 @@ function handleSignup() {
 }
 
 // ============================================================
+// SUPABASE AUTH
+// ============================================================
+
+var supabaseClient = null;
+var currentUser = null;
+
+function initSupabase() {
+  // Read from global config or inline (set these before deploying)
+  var supabaseUrl = window.CLAUDEX_SUPABASE_URL || '';
+  var supabaseKey = window.CLAUDEX_SUPABASE_KEY || '';
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.warn('[Claudex] Supabase not configured. Set window.CLAUDEX_SUPABASE_URL and window.CLAUDEX_SUPABASE_KEY');
+    return;
+  }
+
+  if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
+    console.warn('[Claudex] Supabase SDK not loaded');
+    return;
+  }
+
+  supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+  // Check existing session
+  supabaseClient.auth.getSession().then(function(result) {
+    if (result.data.session) {
+      setLoggedInUser(result.data.session.user);
+    }
+  });
+
+  // Listen for auth changes
+  supabaseClient.auth.onAuthStateChange(function(event, session) {
+    if (session && session.user) {
+      setLoggedInUser(session.user);
+    } else {
+      setLoggedOutState();
+    }
+  });
+}
+
+function setLoggedInUser(user) {
+  currentUser = user;
+  var loginBtn = document.getElementById('nav-login-btn');
+  var userInfo = document.getElementById('nav-user-info');
+  var emailEl = document.getElementById('nav-user-email');
+  if (loginBtn) loginBtn.style.display = 'none';
+  if (userInfo) userInfo.style.display = 'inline';
+  if (emailEl) emailEl.textContent = user.email || '';
+}
+
+function setLoggedOutState() {
+  currentUser = null;
+  var loginBtn = document.getElementById('nav-login-btn');
+  var userInfo = document.getElementById('nav-user-info');
+  if (loginBtn) loginBtn.style.display = 'inline';
+  if (userInfo) userInfo.style.display = 'none';
+}
+
+function handleSignup() {
+  var email = document.getElementById('signup-email').value.trim();
+  var password = document.getElementById('signup-password').value;
+  var errEl = document.getElementById('signup-error');
+  var btn = document.getElementById('signup-btn');
+
+  if (!email || !password) {
+    errEl.textContent = 'Please enter email and password.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  if (password.length < 8) {
+    errEl.textContent = 'Password must be at least 8 characters.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  if (!supabaseClient) {
+    errEl.textContent = 'Auth service not configured. Contact support.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.textContent = 'Creating account...';
+  btn.disabled = true;
+  errEl.style.display = 'none';
+
+  supabaseClient.auth.signUp({ email: email, password: password })
+    .then(function(result) {
+      if (result.error) {
+        errEl.textContent = result.error.message;
+        errEl.style.display = 'block';
+        btn.textContent = 'Create Account';
+        btn.disabled = false;
+        return;
+      }
+
+      btn.textContent = 'Account created!';
+      btn.style.background = '#10B981';
+
+      if (selectedPlan !== 'free') {
+        // Redirect to Stripe Checkout for paid plans
+        setTimeout(function() {
+          // TODO: Call /api/stripe/checkout to create session
+          alert('Account created! Stripe payment integration coming soon.\nPlan: ' + selectedPlan.toUpperCase() + '\n\nYou can now login to the AirHunt app with: ' + email);
+          window.location.hash = '#/airdrops';
+          btn.textContent = 'Create Account';
+          btn.style.background = '#7C3AED';
+          btn.disabled = false;
+        }, 1500);
+      } else {
+        setTimeout(function() {
+          window.location.hash = '#/airdrops';
+          btn.textContent = 'Create Account';
+          btn.style.background = '#7C3AED';
+          btn.disabled = false;
+        }, 1500);
+      }
+    })
+    .catch(function(err) {
+      errEl.textContent = err.message || 'Signup failed. Try again.';
+      errEl.style.display = 'block';
+      btn.textContent = 'Create Account';
+      btn.disabled = false;
+    });
+}
+
+function handleLogin() {
+  var email = document.getElementById('login-email').value.trim();
+  var password = document.getElementById('login-password').value;
+  var errEl = document.getElementById('login-error');
+  var btn = document.getElementById('login-btn');
+
+  if (!email || !password) {
+    errEl.textContent = 'Please enter email and password.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  if (!supabaseClient) {
+    errEl.textContent = 'Auth service not configured. Contact support.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.textContent = 'Signing in...';
+  btn.disabled = true;
+  errEl.style.display = 'none';
+
+  supabaseClient.auth.signInWithPassword({ email: email, password: password })
+    .then(function(result) {
+      if (result.error) {
+        errEl.textContent = result.error.message;
+        errEl.style.display = 'block';
+        btn.textContent = 'Sign In';
+        btn.disabled = false;
+        return;
+      }
+
+      btn.textContent = 'Success!';
+      btn.style.background = '#10B981';
+      setTimeout(function() {
+        window.location.hash = '#/airdrops';
+        btn.textContent = 'Sign In';
+        btn.style.background = '#7C3AED';
+        btn.disabled = false;
+      }, 1000);
+    })
+    .catch(function(err) {
+      errEl.textContent = err.message || 'Login failed. Try again.';
+      errEl.style.display = 'block';
+      btn.textContent = 'Sign In';
+      btn.disabled = false;
+    });
+}
+
+function handleLogout() {
+  if (!supabaseClient) return;
+  supabaseClient.auth.signOut().then(function() {
+    setLoggedOutState();
+    window.location.hash = '#/airdrops';
+  });
+}
+
+// ============================================================
 // INIT
 // ============================================================
+initSupabase();
 handleRoute();
 </script>
 </body>
