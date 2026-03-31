@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>@mochi_d3fi - Links</title>
+<meta name="description" content="mochi's DeFi links. Airdrop dashboard, crypto card comparison, and more. DYOR - NFA.">
+<meta name="keywords" content="airdrop, DeFi, crypto, mochi, エアドロップ, 仮想通貨, リンクまとめ">
+<meta property="og:title" content="@mochi_d3fi - Links">
+<meta property="og:description" content="DeFi beginner sharing my journey. Airdrop tools, crypto cards, and guides.">
+<meta property="og:type" content="profile">
+<meta property="og:url" content="https://claudex.app/links">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@mochi_d3fi">
+<meta name="twitter:title" content="@mochi_d3fi - Links">
+<meta name="twitter:description" content="DeFi beginner sharing my journey. Airdrop tools, crypto cards, and guides.">
+<link rel="canonical" href="https://claudex.app/links">
+<style>
+  :root {
+    --bg-primary: #0a0e17;
+    --bg-secondary: #111827;
+    --bg-card: #1a2235;
+    --bg-card-hover: #1f2a40;
+    --border: #2a3550;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-1: #6366f1;
+    --accent-2: #8b5cf6;
+    --accent-3: #06b6d4;
+    --gradient-1: linear-gradient(135deg, #6366f1, #8b5cf6);
+    --gradient-2: linear-gradient(135deg, #06b6d4, #6366f1);
+    --radius: 12px;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .container {
+    max-width: 480px;
+    width: 100%;
+    padding: 40px 20px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    flex: 1;
+  }
+
+  .profile {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: var(--gradient-1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    font-weight: 700;
+    color: #fff;
+    border: 3px solid var(--border);
+  }
+
+  .profile h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .profile p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    max-width: 300px;
+  }
+
+  .links {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .link-btn {
+    display: block;
+    width: 100%;
+    padding: 16px 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    transition: var(--transition);
+    cursor: pointer;
+  }
+
+  .link-btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--accent-1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
+  }
+
+  .link-btn:active {
+    transform: translateY(0);
+  }
+
+  .link-btn .label {
+    display: block;
+  }
+
+  .link-btn .sub {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .link-btn.highlight {
+    background: var(--gradient-1);
+    border-color: transparent;
+    color: #fff;
+  }
+
+  .link-btn.highlight:hover {
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+    border-color: transparent;
+  }
+
+  .link-btn.highlight .sub {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .footer {
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+    padding: 24px 20px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .footer a {
+    color: var(--text-secondary);
+    text-decoration: none;
+  }
+
+  .footer a:hover {
+    color: var(--accent-1);
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="profile">
+      <div class="avatar">m</div>
+      <h1>@mochi_d3fi</h1>
+      <p>DeFi beginner sharing my journey</p>
+    </div>
+
+    <div class="links">
+      <a class="link-btn highlight"
+         href="/api/redirect/dashboard?utm_source=linktree&utm_medium=link&utm_content=airdrop-dashboard">
+        <span class="label">Airdrop Dashboard</span>
+        <span class="sub">Track active airdrops and tasks</span>
+      </a>
+
+      <a class="link-btn"
+         href="/api/redirect/cards?utm_source=linktree&utm_medium=link&utm_content=card-comparison">
+        <span class="label">Crypto Card Comparison</span>
+        <span class="sub">Find the best card for Japan</span>
+      </a>
+
+      <a class="link-btn"
+         href="/api/redirect/airhunt?utm_source=linktree&utm_medium=link&utm_content=airhunt-app">
+        <span class="label">AirHunt App</span>
+        <span class="sub">Discover new airdrop opportunities</span>
+      </a>
+
+      <a class="link-btn"
+         href="/api/redirect/twitter?utm_source=linktree&utm_medium=link&utm_content=twitter"
+         target="_blank" rel="noopener noreferrer">
+        <span class="label">Twitter / X</span>
+        <span class="sub">@mochi_d3fi</span>
+      </a>
+
+      <a class="link-btn"
+         href="/api/redirect/guide?utm_source=linktree&utm_medium=link&utm_content=airdrop-guide">
+        <span class="label">Latest Airdrop Guide</span>
+        <span class="sub">Step-by-step beginner guide</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer">
+    Powered by <a href="/">Claudex</a> | DYOR - NFA
+  </div>
+</body>
+</html>

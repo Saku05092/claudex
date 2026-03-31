@@ -33,6 +33,15 @@ import { createCampaignRepository } from "../discovery/campaign-repository.js";
 import { createDiscoveryPipeline } from "../discovery/discovery-pipeline.js";
 import type { RunResult } from "../monitoring/types.js";
 import { createCheckoutSession, handleWebhook, collectRequestBody } from "./stripe.js";
+import { createRevenueTracker } from "../core/revenue-tracker.js";
+import {
+  initClickTracking,
+  trackClick,
+  getClicksByPlatform,
+  getClicksByDate,
+  getTopCampaigns,
+  getClickSummary,
+} from "../core/utm-tracker.js";
 
 const PORT = Number(process.env.CLAUDEX_API_PORT ?? 3001);
 const BEARER_TOKEN = process.env.TWITTER_BEARER_TOKEN ?? "";
@@ -63,7 +72,9 @@ function requireAuth(req: IncomingMessage): { authorized: boolean; response?: { 
 }
 
 const db = createDatabase();
+initClickTracking();
 const analyzer = createTweetAnalyzer(db);
+const revenueTracker = createRevenueTracker();
 
 // Campaign repository (DB-backed)
 const campaignRepo = createCampaignRepository(db);
@@ -251,6 +262,30 @@ function routeRequest(path: string): { body: string; status: number; headers: Re
     return jsonResponse(analyzer.getRecentTweets());
   }
 
+  // Revenue
+  if (path === "/api/revenue/summary") {
+    return jsonResponse(revenueTracker.getRevenueSummary());
+  }
+  if (path.startsWith("/api/revenue/") && path !== "/api/revenue/summary") {
+    const campaignId = path.replace("/api/revenue/", "");
+    const campaignRevenue = revenueTracker.getCampaignRevenue(campaignId);
+    if (campaignRevenue) {
+      return jsonResponse(campaignRevenue);
+    }
+    return jsonResponse({ error: "No revenue data for campaign" }, 404);
+  }
+
+  // Click tracking
+  if (path === "/api/clicks/summary") {
+    return jsonResponse(getClickSummary(db));
+  }
+  if (path.startsWith("/api/clicks/")) {
+    const campaignId = path.replace("/api/clicks/", "");
+    const byPlatform = getClicksByPlatform(db, campaignId);
+    const byDate = getClicksByDate(db, campaignId, 30);
+    return jsonResponse({ campaignId, byPlatform, byDate });
+  }
+
   return jsonResponse({
     error: "Not found",
     availableEndpoints: [
@@ -258,6 +293,12 @@ function routeRequest(path: string): { body: string; status: number; headers: Re
       "GET /api/campaigns",
       "GET /api/campaigns/all",
       "GET /api/campaigns/:id",
+      "GET /api/revenue/summary",
+      "GET /api/revenue/:campaignId",
+      "POST /api/revenue",
+      "GET /api/clicks/:campaignId",
+      "GET /api/clicks/summary",
+      "GET /api/redirect/:campaignId",
       "GET /api/monitor",
       "GET /api/monitor/stats",
       "GET /api/monitor/trending",
@@ -337,6 +378,48 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
       return;
     }
 
+    // Revenue: Record revenue entry (requires auth)
+    if (url.pathname === "/api/revenue") {
+      collectRequestBody(req).then(
+        (body) => {
+          try {
+            const parsed = JSON.parse(body) as {
+              campaignId?: string;
+              platform?: string;
+              amount?: number;
+              signups?: number;
+            };
+            const { campaignId, platform, amount, signups } = parsed;
+            if (!campaignId || !platform || amount === undefined || signups === undefined) {
+              sendResponse(
+                res,
+                jsonResponse(
+                  { error: "campaignId, platform, amount, and signups are required" },
+                  400
+                )
+              );
+              return;
+            }
+            const entry = revenueTracker.recordRevenue(
+              campaignId,
+              platform,
+              Number(amount),
+              Number(signups)
+            );
+            sendResponse(res, jsonResponse(entry, 201));
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            sendResponse(res, jsonResponse({ error: msg }, 500));
+          }
+        },
+        (error) => {
+          const msg = error instanceof Error ? error.message : String(error);
+          sendResponse(res, jsonResponse({ error: msg }, 500));
+        }
+      );
+      return;
+    }
+
     // Stripe: Create checkout session (requires auth)
     if (url.pathname === "/api/stripe/checkout") {
       collectRequestBody(req).then(
@@ -385,6 +468,31 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
     }
 
     sendResponse(res, jsonResponse({ error: "Not found" }, 404));
+    return;
+  }
+
+  // Redirect endpoint (tracks click then 302 redirects)
+  if (url.pathname.startsWith("/api/redirect/")) {
+    const campaignId = url.pathname.replace("/api/redirect/", "");
+    const platform = url.searchParams.get("utm_source") ?? "direct";
+    const content = url.searchParams.get("utm_content") ?? "";
+    const referrer = req.headers["referer"] ?? "";
+    const userAgent = req.headers["user-agent"] ?? "";
+
+    trackClick(db, campaignId, platform, content, referrer, userAgent);
+
+    // Look up referral link for this campaign
+    const row = db
+      .prepare("SELECT referral_link FROM campaigns WHERE id = ?")
+      .get(campaignId) as { referral_link: string } | undefined;
+
+    const redirectUrl = row?.referral_link || `/#/campaigns/${campaignId}`;
+
+    res.writeHead(302, {
+      Location: redirectUrl,
+      "Access-Control-Allow-Origin": "*",
+    });
+    res.end();
     return;
   }
 
