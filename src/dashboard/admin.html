@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Claudex Admin Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
   :root {
     --bg-primary: #0a0e17;
@@ -307,28 +306,11 @@
     <div class="nav-brand">CLAUDEX ADMIN</div>
     <a class="nav-link" href="/">Back to Dashboard</a>
   </div>
-  <div id="nav-auth-area">
-    <span id="nav-user-info" style="display:none; color:var(--text-secondary); font-size:0.85rem;">
-      <span id="nav-user-email"></span>
-      <a href="#" onclick="handleLogout();return false;" style="color:var(--accent-red); margin-left:8px; text-decoration:none; font-weight:600; font-size:0.8rem;">Logout</a>
-    </span>
-  </div>
+  <span style="color:var(--text-muted); font-size:0.82rem; margin-left:auto;">Local Only</span>
 </nav>
 
-<!-- Login Gate -->
-<div id="admin-login-gate" style="display:block;">
-  <div class="login-container">
-    <h2>Admin Login</h2>
-    <p>Sign in with your admin account to access the control panel.</p>
-    <div id="login-error" class="login-error"></div>
-    <input type="email" id="login-email" placeholder="Email" autocomplete="email">
-    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password">
-    <button class="btn btn-primary" style="width:100%; padding:14px;" onclick="handleLogin()">Sign In</button>
-  </div>
-</div>
-
-<!-- Admin Content (hidden until authenticated) -->
-<div id="admin-content" style="display:none;">
+<!-- Admin Content (always visible - local access only) -->
+<div id="admin-content">
   <div class="container" style="padding-top:32px; padding-bottom:60px;">
 
     <!-- ============================================================ -->
@@ -494,7 +476,7 @@ var MONITOR_RUN_API = API_BASE + '/api/monitor/run';
 var DISCOVERY_RUN_API = API_BASE + '/api/discovery/run';
 
 // Admin email whitelist ('*' = any logged-in user is admin)
-var ADMIN_EMAILS = ['*'];
+// Admin page: local access only, no authentication required
 
 // ============================================================
 // UTILITY
@@ -516,113 +498,7 @@ function formatNumber(n) {
   return String(n);
 }
 
-// ============================================================
-// SUPABASE AUTH
-// ============================================================
-
-var supabaseClient = null;
-var currentUser = null;
-
-function initSupabase() {
-  var supabaseUrl = window.CLAUDEX_SUPABASE_URL || '';
-  var supabaseKey = window.CLAUDEX_SUPABASE_KEY || '';
-
-  if (!supabaseUrl || !supabaseKey) {
-    console.warn('[Admin] Supabase not configured.');
-    return;
-  }
-
-  if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
-    console.warn('[Admin] Supabase SDK not loaded');
-    return;
-  }
-
-  supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-  supabaseClient.auth.getSession().then(function(result) {
-    if (result.data.session) {
-      onAuthSuccess(result.data.session.user);
-    }
-  });
-
-  supabaseClient.auth.onAuthStateChange(function(event, session) {
-    if (session && session.user) {
-      onAuthSuccess(session.user);
-    } else {
-      onAuthLogout();
-    }
-  });
-}
-
-function isAdmin() {
-  if (!currentUser) return false;
-  if (ADMIN_EMAILS.includes('*')) return true;
-  return ADMIN_EMAILS.includes(currentUser.email);
-}
-
-function onAuthSuccess(user) {
-  currentUser = user;
-  document.getElementById('nav-user-email').textContent = user.email || '';
-  document.getElementById('nav-user-info').style.display = 'inline';
-
-  if (isAdmin()) {
-    document.getElementById('admin-login-gate').style.display = 'none';
-    document.getElementById('admin-content').style.display = 'block';
-    loadMonitorData();
-  } else {
-    var errEl = document.getElementById('login-error');
-    errEl.textContent = 'Access denied. Admin privileges required.';
-    errEl.style.display = 'block';
-  }
-}
-
-function onAuthLogout() {
-  currentUser = null;
-  document.getElementById('nav-user-info').style.display = 'none';
-  document.getElementById('admin-login-gate').style.display = 'block';
-  document.getElementById('admin-content').style.display = 'none';
-}
-
-function handleLogin() {
-  var email = document.getElementById('login-email').value.trim();
-  var password = document.getElementById('login-password').value;
-  var errEl = document.getElementById('login-error');
-
-  if (!email || !password) {
-    errEl.textContent = 'Please enter email and password.';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  if (!supabaseClient) {
-    errEl.textContent = 'Auth service not configured. Contact support.';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  errEl.style.display = 'none';
-
-  supabaseClient.auth.signInWithPassword({ email: email, password: password })
-    .then(function(result) {
-      if (result.error) {
-        errEl.textContent = result.error.message;
-        errEl.style.display = 'block';
-        return;
-      }
-      // onAuthSuccess will be called via onAuthStateChange
-    })
-    .catch(function(err) {
-      errEl.textContent = err.message || 'Login failed.';
-      errEl.style.display = 'block';
-    });
-}
-
-function handleLogout() {
-  if (!supabaseClient) return;
-  supabaseClient.auth.signOut().then(function() {
-    onAuthLogout();
-  });
-}
+// No authentication needed - local access only
 
 // ============================================================
 // AUTH HEADERS
@@ -1018,7 +894,8 @@ function runFullAuto() {
 // ============================================================
 // INIT
 // ============================================================
-initSupabase();
+// Load data on page load (no auth needed)
+loadMonitorData();
 </script>
 </body>
 </html>
