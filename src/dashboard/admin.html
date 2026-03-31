@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claudex Admin Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  :root {
+    --bg-primary: #0a0e17;
+    --bg-secondary: #111827;
+    --bg-card: #1a2235;
+    --bg-card-hover: #1f2a40;
+    --border: #2a3550;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-1: #6366f1;
+    --accent-2: #8b5cf6;
+    --accent-3: #06b6d4;
+    --accent-green: #10b981;
+    --accent-yellow: #f59e0b;
+    --accent-red: #ef4444;
+    --accent-gold: #d4a017;
+    --gradient-1: linear-gradient(135deg, #6366f1, #8b5cf6);
+    --gradient-2: linear-gradient(135deg, #06b6d4, #6366f1);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.3);
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    padding-top: 56px;
+  }
+
+  /* ---- Nav Bar ---- */
+  .nav-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(10, 14, 23, 0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    justify-content: space-between;
+  }
+  .nav-brand {
+    font-size: 0.9rem;
+    font-weight: 700;
+    background: var(--gradient-1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.04em;
+  }
+  .nav-link {
+    padding: 8px 18px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition);
+  }
+  .nav-link:hover {
+    color: var(--text-primary);
+    background: rgba(99, 102, 241, 0.08);
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    padding-left: 14px;
+    border-left: 3px solid var(--accent-1);
+  }
+
+  /* ---- Buttons ---- */
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    color: #fff;
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn-primary {
+    background: var(--gradient-1);
+  }
+  .btn-primary:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+  }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--accent-1);
+    color: var(--accent-1);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: rgba(99,102,241,0.1);
+  }
+  .btn-green {
+    background: var(--accent-green);
+  }
+  .btn-green:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+  .btn-yellow {
+    background: var(--accent-yellow);
+    color: #000;
+  }
+  .btn-yellow:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+  .btn-red {
+    background: var(--accent-red);
+  }
+  .btn-red:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  /* ---- Cards / Panels ---- */
+  .panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 20px;
+  }
+  .panel h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: var(--text-primary);
+  }
+  .panel-result {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 12px;
+    padding: 10px;
+    background: rgba(0,0,0,0.2);
+    border-radius: var(--radius-sm);
+    min-height: 24px;
+  }
+
+  .btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* ---- Quick Stats ---- */
+  .quick-stats {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin: 28px 0;
+    flex-wrap: wrap;
+  }
+  .quick-stat {
+    text-align: center;
+  }
+  .quick-stat-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+  .quick-stat-label {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 2px;
+  }
+
+  /* ---- Table ---- */
+  .table-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    white-space: nowrap;
+  }
+  .data-table th {
+    background: var(--bg-card);
+    padding: 14px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--text-secondary);
+  }
+  .data-table tr:hover td {
+    background: rgba(99,102,241,0.04);
+  }
+
+  /* ---- Grid ---- */
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  /* ---- Login ---- */
+  .login-container {
+    max-width: 400px;
+    margin: 80px auto;
+    text-align: center;
+  }
+  .login-container h2 {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+  }
+  .login-container p {
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+  .login-container input {
+    width: 100%;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color var(--transition);
+  }
+  .login-container input:focus {
+    border-color: var(--accent-1);
+  }
+  .login-error {
+    color: var(--accent-red);
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+    display: none;
+  }
+
+  /* ---- Empty state ---- */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 768px) {
+    .grid-3 { grid-template-columns: 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .quick-stats { gap: 16px; }
+    .data-table { font-size: 0.8rem; }
+    .data-table th, .data-table td { padding: 10px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav-bar">
+  <div style="display:flex; align-items:center; gap:24px;">
+    <div class="nav-brand">CLAUDEX ADMIN</div>
+    <a class="nav-link" href="/">Back to Dashboard</a>
+  </div>
+  <div id="nav-auth-area">
+    <span id="nav-user-info" style="display:none; color:var(--text-secondary); font-size:0.85rem;">
+      <span id="nav-user-email"></span>
+      <a href="#" onclick="handleLogout();return false;" style="color:var(--accent-red); margin-left:8px; text-decoration:none; font-weight:600; font-size:0.8rem;">Logout</a>
+    </span>
+  </div>
+</nav>
+
+<!-- Login Gate -->
+<div id="admin-login-gate" style="display:block;">
+  <div class="login-container">
+    <h2>Admin Login</h2>
+    <p>Sign in with your admin account to access the control panel.</p>
+    <div id="login-error" class="login-error"></div>
+    <input type="email" id="login-email" placeholder="Email" autocomplete="email">
+    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password">
+    <button class="btn btn-primary" style="width:100%; padding:14px;" onclick="handleLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- Admin Content (hidden until authenticated) -->
+<div id="admin-content" style="display:none;">
+  <div class="container" style="padding-top:32px; padding-bottom:60px;">
+
+    <!-- ============================================================ -->
+    <!-- MONITOR CONTROLS -->
+    <!-- ============================================================ -->
+    <h2 class="section-title">Monitor Controls</h2>
+    <div class="panel">
+      <h3>Search & Monitor</h3>
+      <div class="btn-group" style="margin-bottom:12px;">
+        <button id="btn-run-keyword" class="btn btn-primary" onclick="runMonitor('keyword')">Keyword Search</button>
+        <button id="btn-run-influencer" class="btn btn-primary" onclick="runMonitor('influencer')">Influencer Search</button>
+        <button id="btn-run-both" class="btn btn-green" onclick="runMonitor('both')">Run Both</button>
+      </div>
+      <div class="btn-group">
+        <button id="btn-discovery-tweet" class="btn btn-secondary" onclick="runDiscovery('tweets')">Discover (Tweets)</button>
+        <button id="btn-discovery-defilama" class="btn btn-secondary" onclick="runDiscovery('defillama')">Discover (DeFiLlama)</button>
+        <button id="btn-discovery-all" class="btn btn-yellow" onclick="runDiscovery('all')">Discover All</button>
+      </div>
+      <div style="margin-top:16px;">
+        <div id="monitor-run-status" style="font-size:0.88rem; color:var(--text-muted);">Ready</div>
+        <div id="monitor-run-result" class="panel-result" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- AUTOMATION CONTROLS (6 panels) -->
+    <!-- ============================================================ -->
+    <h2 class="section-title" style="margin-top:40px;">Automation Controls</h2>
+    <div class="grid-2">
+
+      <!-- Auto Post -->
+      <div class="panel">
+        <h3>Auto Post</h3>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="runAutoPost('experience')">Experience</button>
+          <button class="btn btn-primary" onclick="runAutoPost('educational')">Educational</button>
+          <button class="btn btn-primary" onclick="runAutoPost('roundup')">Roundup</button>
+          <button class="btn btn-primary" onclick="runAutoPost('news')">News</button>
+        </div>
+        <div id="autopost-result" class="panel-result">--</div>
+      </div>
+
+      <!-- Referral Detection -->
+      <div class="panel">
+        <h3>Referral Detection</h3>
+        <div class="btn-group">
+          <button class="btn btn-secondary" onclick="runReferralScan('scan')">Scan</button>
+          <button class="btn btn-green" onclick="runReferralScan('auto')">Auto Register</button>
+        </div>
+        <div id="referral-scan-result" class="panel-result">--</div>
+      </div>
+
+      <!-- Revenue -->
+      <div class="panel">
+        <h3>Revenue</h3>
+        <div class="btn-group">
+          <button class="btn btn-secondary" onclick="loadRevenue()">Load Summary</button>
+        </div>
+        <div id="revenue-result" class="panel-result">--</div>
+      </div>
+
+      <!-- Click Tracking -->
+      <div class="panel">
+        <h3>Click Tracking</h3>
+        <div class="btn-group">
+          <button class="btn btn-secondary" onclick="loadClickStats()">Load Stats</button>
+        </div>
+        <div id="clicks-result" class="panel-result">--</div>
+      </div>
+
+      <!-- Post History -->
+      <div class="panel">
+        <h3>Post History</h3>
+        <div class="btn-group">
+          <button class="btn btn-secondary" onclick="loadPostHistory()">Load History</button>
+        </div>
+        <div id="post-history-result" class="panel-result">--</div>
+      </div>
+
+      <!-- Full Auto -->
+      <div class="panel">
+        <h3>Full Auto</h3>
+        <div class="btn-group">
+          <button class="btn btn-red" onclick="runFullAuto()">Run All</button>
+        </div>
+        <div id="full-auto-result" class="panel-result">--</div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MONITOR DATA -->
+    <!-- ============================================================ -->
+    <h2 class="section-title" style="margin-top:40px;">Monitor Data</h2>
+
+    <!-- Quick Stats -->
+    <div class="panel">
+      <div class="quick-stats">
+        <div class="quick-stat">
+          <div class="quick-stat-value" id="monitor-stat-total">--</div>
+          <div class="quick-stat-label">Total Tweets</div>
+        </div>
+        <div class="quick-stat">
+          <div class="quick-stat-value" id="monitor-stat-24h">--</div>
+          <div class="quick-stat-label">Last 24h</div>
+        </div>
+        <div class="quick-stat">
+          <div class="quick-stat-value" id="monitor-stat-authors">--</div>
+          <div class="quick-stat-label">Authors</div>
+        </div>
+        <div class="quick-stat">
+          <div class="quick-stat-value" id="monitor-stat-cost">--</div>
+          <div class="quick-stat-label">Est. Cost</div>
+        </div>
+      </div>
+      <div style="text-align:center; font-size:0.82rem; color:var(--text-muted); margin-top:8px;">
+        <span id="monitor-last-run">Last run: --</span>
+        &nbsp;|&nbsp;
+        <span id="monitor-total-runs">Runs: --</span>
+      </div>
+    </div>
+
+    <!-- Trending Projects -->
+    <h3 style="font-size:1.1rem; font-weight:700; margin:28px 0 16px;">Trending Projects</h3>
+    <div id="monitor-trending" class="grid-3"></div>
+    <div id="monitor-trending-empty" class="empty-state" style="display:none;">No trending data yet. Run a monitor search first.</div>
+
+    <!-- Top Influencers -->
+    <h3 style="font-size:1.1rem; font-weight:700; margin:28px 0 16px;">Top Influencers</h3>
+    <div class="table-wrapper" style="margin-bottom:28px;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Followers</th>
+            <th>Tweets</th>
+            <th>Total Engagement</th>
+            <th>Avg Engagement</th>
+          </tr>
+        </thead>
+        <tbody id="monitor-influencer-body">
+          <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No data</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Recent Tweets -->
+    <h3 style="font-size:1.1rem; font-weight:700; margin:28px 0 16px;">Recent Tweets</h3>
+    <div id="monitor-tweets" style="display:flex; flex-direction:column; gap:12px;"></div>
+    <div id="monitor-tweets-empty" class="empty-state" style="display:none;">No tweets captured yet.</div>
+
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+
+var API_BASE = 'http://localhost:3001';
+var MONITOR_API = API_BASE + '/api/monitor';
+var MONITOR_RUN_API = API_BASE + '/api/monitor/run';
+var DISCOVERY_RUN_API = API_BASE + '/api/discovery/run';
+
+// Admin email whitelist ('*' = any logged-in user is admin)
+var ADMIN_EMAILS = ['*'];
+
+// ============================================================
+// UTILITY
+// ============================================================
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function formatNumber(n) {
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+  return String(n);
+}
+
+// ============================================================
+// SUPABASE AUTH
+// ============================================================
+
+var supabaseClient = null;
+var currentUser = null;
+
+function initSupabase() {
+  var supabaseUrl = window.CLAUDEX_SUPABASE_URL || '';
+  var supabaseKey = window.CLAUDEX_SUPABASE_KEY || '';
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.warn('[Admin] Supabase not configured.');
+    return;
+  }
+
+  if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
+    console.warn('[Admin] Supabase SDK not loaded');
+    return;
+  }
+
+  supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+  supabaseClient.auth.getSession().then(function(result) {
+    if (result.data.session) {
+      onAuthSuccess(result.data.session.user);
+    }
+  });
+
+  supabaseClient.auth.onAuthStateChange(function(event, session) {
+    if (session && session.user) {
+      onAuthSuccess(session.user);
+    } else {
+      onAuthLogout();
+    }
+  });
+}
+
+function isAdmin() {
+  if (!currentUser) return false;
+  if (ADMIN_EMAILS.includes('*')) return true;
+  return ADMIN_EMAILS.includes(currentUser.email);
+}
+
+function onAuthSuccess(user) {
+  currentUser = user;
+  document.getElementById('nav-user-email').textContent = user.email || '';
+  document.getElementById('nav-user-info').style.display = 'inline';
+
+  if (isAdmin()) {
+    document.getElementById('admin-login-gate').style.display = 'none';
+    document.getElementById('admin-content').style.display = 'block';
+    loadMonitorData();
+  } else {
+    var errEl = document.getElementById('login-error');
+    errEl.textContent = 'Access denied. Admin privileges required.';
+    errEl.style.display = 'block';
+  }
+}
+
+function onAuthLogout() {
+  currentUser = null;
+  document.getElementById('nav-user-info').style.display = 'none';
+  document.getElementById('admin-login-gate').style.display = 'block';
+  document.getElementById('admin-content').style.display = 'none';
+}
+
+function handleLogin() {
+  var email = document.getElementById('login-email').value.trim();
+  var password = document.getElementById('login-password').value;
+  var errEl = document.getElementById('login-error');
+
+  if (!email || !password) {
+    errEl.textContent = 'Please enter email and password.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  if (!supabaseClient) {
+    errEl.textContent = 'Auth service not configured. Contact support.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  errEl.style.display = 'none';
+
+  supabaseClient.auth.signInWithPassword({ email: email, password: password })
+    .then(function(result) {
+      if (result.error) {
+        errEl.textContent = result.error.message;
+        errEl.style.display = 'block';
+        return;
+      }
+      // onAuthSuccess will be called via onAuthStateChange
+    })
+    .catch(function(err) {
+      errEl.textContent = err.message || 'Login failed.';
+      errEl.style.display = 'block';
+    });
+}
+
+function handleLogout() {
+  if (!supabaseClient) return;
+  supabaseClient.auth.signOut().then(function() {
+    onAuthLogout();
+  });
+}
+
+// ============================================================
+// AUTH HEADERS
+// ============================================================
+
+function getAuthHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + (window.CLAUDEX_API_SECRET || ''),
+  };
+}
+
+// ============================================================
+// MONITOR CONTROLS
+// ============================================================
+
+var ALL_BUTTONS = [
+  'btn-run-keyword', 'btn-run-influencer', 'btn-run-both',
+  'btn-discovery-tweet', 'btn-discovery-defilama', 'btn-discovery-all'
+];
+
+function setButtonsDisabled(disabled) {
+  ALL_BUTTONS.forEach(function(id) {
+    var btn = document.getElementById(id);
+    if (btn) {
+      btn.disabled = disabled;
+      btn.style.opacity = disabled ? '0.5' : '1';
+    }
+  });
+}
+
+function runMonitor(mode) {
+  var statusEl = document.getElementById('monitor-run-status');
+  var resultEl = document.getElementById('monitor-run-result');
+
+  setButtonsDisabled(true);
+  statusEl.textContent = 'Running monitor (' + mode + ')...';
+  statusEl.style.color = 'var(--accent-yellow)';
+  resultEl.style.display = 'none';
+
+  fetch(MONITOR_RUN_API + '/' + mode, { method: 'POST' })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.error) {
+        statusEl.textContent = 'Error: ' + data.error;
+        statusEl.style.color = 'var(--accent-red)';
+        return;
+      }
+
+      statusEl.textContent = 'Completed';
+      statusEl.style.color = 'var(--accent-green)';
+
+      var lines = [];
+      if (data.results) {
+        data.results.forEach(function(r) {
+          lines.push(escapeHtml(r.runType) + ': ' + r.tweetsFound + ' found, ' + r.tweetsNew + ' new (' + escapeHtml(r.estimatedCost) + ')');
+        });
+      }
+      if (data.summary) {
+        lines.push('---');
+        lines.push('Total: ' + data.summary.totalNew + ' new tweets saved | DB: ' + data.summary.totalInDb + ' | Cost: ' + data.summary.estimatedCost);
+      }
+      resultEl.innerHTML = lines.join('<br>');
+      resultEl.style.display = 'block';
+
+      loadMonitorData();
+    })
+    .catch(function(err) {
+      statusEl.textContent = 'Failed: ' + err.message;
+      statusEl.style.color = 'var(--accent-red)';
+    })
+    .finally(function() {
+      setButtonsDisabled(false);
+    });
+}
+
+function runDiscovery(mode) {
+  var statusEl = document.getElementById('monitor-run-status');
+  var resultEl = document.getElementById('monitor-run-result');
+
+  setButtonsDisabled(true);
+  statusEl.textContent = 'Running discovery (' + mode + ')...';
+  statusEl.style.color = 'var(--accent-yellow)';
+  resultEl.style.display = 'none';
+
+  fetch(DISCOVERY_RUN_API + '/' + mode, { method: 'POST' })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.error) {
+        statusEl.textContent = 'Error: ' + data.error;
+        statusEl.style.color = 'var(--accent-red)';
+        return;
+      }
+
+      statusEl.textContent = 'Discovery completed';
+      statusEl.style.color = 'var(--accent-green)';
+
+      var lines = [];
+      if (data.results) {
+        data.results.forEach(function(r) {
+          lines.push('<b>[' + escapeHtml(r.mode) + ']</b> Evaluated: ' + r.evaluated + ' | Registered: ' + r.registered + ' | Skipped: ' + r.skipped);
+          r.campaigns.forEach(function(c) {
+            var icon = c.action === 'registered' ? '+' : c.action === 'exists' ? '=' : '-';
+            lines.push('  ' + icon + ' ' + escapeHtml(c.name) + ': ' + escapeHtml(c.reason));
+          });
+        });
+        lines.push('---');
+        lines.push('Total campaigns in DB: ' + data.totalCampaigns);
+      } else {
+        lines.push('Evaluated: ' + (data.evaluated || 0) + ' | Registered: ' + (data.registered || 0) + ' | Skipped: ' + (data.skipped || 0));
+        if (data.campaigns) {
+          data.campaigns.forEach(function(c) {
+            var icon = c.action === 'registered' ? '+' : c.action === 'exists' ? '=' : '-';
+            lines.push('  ' + icon + ' ' + escapeHtml(c.name) + ': ' + escapeHtml(c.reason));
+          });
+        }
+        lines.push('Total campaigns: ' + (data.totalCampaigns || '-'));
+      }
+      resultEl.innerHTML = lines.join('<br>');
+      resultEl.style.display = 'block';
+
+      loadMonitorData();
+    })
+    .catch(function(err) {
+      statusEl.textContent = 'Failed: ' + err.message;
+      statusEl.style.color = 'var(--accent-red)';
+    })
+    .finally(function() {
+      setButtonsDisabled(false);
+    });
+}
+
+// ============================================================
+// MONITOR DATA
+// ============================================================
+
+function loadMonitorData() {
+  fetch(MONITOR_API)
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      renderMonitorStats(data.stats);
+      renderTrendingProjects(data.trendingProjects);
+      renderMonitorInfluencers(data.topInfluencers);
+      renderMonitorTweets(data.recentTweets);
+    })
+    .catch(function(err) {
+      console.error('Monitor API error:', err);
+      document.getElementById('monitor-trending-empty').style.display = 'block';
+      document.getElementById('monitor-tweets-empty').style.display = 'block';
+    });
+}
+
+function renderMonitorStats(stats) {
+  document.getElementById('monitor-stat-total').textContent = stats.totalTweets;
+  document.getElementById('monitor-stat-24h').textContent = stats.tweetsLast24h;
+  document.getElementById('monitor-stat-authors').textContent = stats.uniqueAuthors;
+  document.getElementById('monitor-stat-cost').textContent = '$' + stats.estimatedTotalCost.toFixed(2);
+  document.getElementById('monitor-last-run').textContent = 'Last run: ' + (stats.lastRunAt ? new Date(stats.lastRunAt).toLocaleString('ja-JP') : '-');
+  document.getElementById('monitor-total-runs').textContent = 'Runs: ' + stats.totalRuns;
+}
+
+function renderTrendingProjects(projects) {
+  var container = document.getElementById('monitor-trending');
+  var empty = document.getElementById('monitor-trending-empty');
+
+  if (!projects || projects.length === 0) {
+    container.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  container.innerHTML = projects.map(function(p) {
+    var engagement = p.totalLikes + p.totalRTs;
+    return '<div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; transition:all var(--transition);">' +
+      '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">' +
+        '<span style="font-weight:700; font-size:1.1rem;">' + escapeHtml(p.name) + '</span>' +
+        '<span style="background:var(--accent-1); color:white; padding:2px 10px; border-radius:12px; font-size:0.78rem; font-weight:600;">' + p.mentions + ' mentions</span>' +
+      '</div>' +
+      '<div style="display:flex; gap:16px; margin-bottom:12px; font-size:0.85rem; color:var(--text-secondary);">' +
+        '<span>Likes: ' + p.totalLikes + '</span>' +
+        '<span>RT: ' + p.totalRTs + '</span>' +
+      '</div>' +
+      '<div style="font-size:0.82rem; color:var(--text-muted); line-height:1.5; margin-bottom:8px;">' +
+        escapeHtml(p.topTweet.slice(0, 120)) + (p.topTweet.length > 120 ? '...' : '') +
+      '</div>' +
+      '<div style="font-size:0.78rem; color:var(--text-muted);">by @' + escapeHtml(p.topAuthor) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderMonitorInfluencers(influencers) {
+  var tbody = document.getElementById('monitor-influencer-body');
+  if (!influencers || influencers.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No data</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = influencers.map(function(inf) {
+    return '<tr>' +
+      '<td><a href="https://x.com/' + escapeHtml(inf.username) + '" target="_blank" style="color:var(--accent-3); text-decoration:none;">@' + escapeHtml(inf.username) + '</a><br><span style="font-size:0.78rem; color:var(--text-muted);">' + escapeHtml(inf.name) + '</span></td>' +
+      '<td>' + formatNumber(inf.followers) + '</td>' +
+      '<td>' + inf.tweetsCaptured + '</td>' +
+      '<td>' + formatNumber(inf.totalEngagement) + '</td>' +
+      '<td>' + inf.avgEngagement + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+function renderMonitorTweets(tweets) {
+  var container = document.getElementById('monitor-tweets');
+  var empty = document.getElementById('monitor-tweets-empty');
+
+  if (!tweets || tweets.length === 0) {
+    container.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  container.innerHTML = tweets.map(function(t) {
+    var sourceColor = t.sourceType === 'keyword' ? 'var(--accent-3)' : 'var(--accent-2)';
+    var date = new Date(t.tweetedAt).toLocaleString('ja-JP', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+    return '<div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px;">' +
+      '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">' +
+        '<div>' +
+          '<a href="https://x.com/' + escapeHtml(t.authorUsername) + '/status/' + t.tweetId + '" target="_blank" style="color:var(--accent-3); text-decoration:none; font-weight:600;">@' + escapeHtml(t.authorUsername) + '</a>' +
+          ' <span style="color:var(--text-muted); font-size:0.82rem;">' + escapeHtml(t.authorName) + '</span>' +
+        '</div>' +
+        '<div style="display:flex; gap:8px; align-items:center;">' +
+          '<span style="font-size:0.72rem; padding:2px 8px; border-radius:8px; border:1px solid ' + sourceColor + '; color:' + sourceColor + ';">' + escapeHtml(t.sourceType) + '</span>' +
+          '<span style="font-size:0.78rem; color:var(--text-muted);">' + date + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div style="font-size:0.9rem; line-height:1.6; color:var(--text-secondary); margin-bottom:8px;">' + escapeHtml(t.text) + '</div>' +
+      '<div style="display:flex; gap:16px; font-size:0.8rem; color:var(--text-muted);">' +
+        '<span>Likes ' + t.likeCount + '</span>' +
+        '<span>RT ' + t.retweetCount + '</span>' +
+        '<span>Reply ' + t.replyCount + '</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ============================================================
+// ADMIN AUTOMATION FUNCTIONS
+// ============================================================
+
+function runAutoPost(pattern) {
+  var el = document.getElementById('autopost-result');
+  el.textContent = 'Generating ' + pattern + ' tweet...';
+  el.style.color = 'var(--accent-yellow)';
+
+  fetch(API_BASE + '/api/autopost', {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ pattern: pattern }),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        el.textContent = 'Error: ' + data.error;
+        el.style.color = 'var(--accent-red)';
+      } else {
+        el.textContent = 'Posted: ' + (data.text || '').substring(0, 80) + '...';
+        el.style.color = 'var(--accent-green)';
+      }
+    })
+    .catch(function(err) {
+      el.textContent = 'Failed: ' + err.message;
+      el.style.color = 'var(--accent-red)';
+    });
+}
+
+function runReferralScan(mode) {
+  var el = document.getElementById('referral-scan-result');
+  el.textContent = 'Scanning for referrals...';
+  el.style.color = 'var(--accent-yellow)';
+
+  fetch(API_BASE + '/api/referrals/scan', {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ mode: mode }),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        el.textContent = 'Error: ' + data.error;
+        el.style.color = 'var(--accent-red)';
+      } else {
+        var count = data.found || 0;
+        var registered = data.registered || 0;
+        el.textContent = 'Found: ' + count + ' programs' + (mode === 'auto' ? ', registered: ' + registered : '');
+        el.style.color = 'var(--accent-green)';
+      }
+    })
+    .catch(function(err) {
+      el.textContent = 'Failed: ' + err.message;
+      el.style.color = 'var(--accent-red)';
+    });
+}
+
+function loadRevenue() {
+  var el = document.getElementById('revenue-result');
+  el.textContent = 'Loading...';
+
+  fetch(API_BASE + '/api/revenue/summary')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        el.textContent = 'Error: ' + data.error;
+        return;
+      }
+      el.innerHTML = 'Total: $' + escapeHtml(String(data.totalEstimatedRevenue || 0)) +
+        ' | Clicks: ' + escapeHtml(String(data.totalClicks || 0)) +
+        ' | Signups: ' + escapeHtml(String(data.totalSignups || 0));
+      el.style.color = 'var(--accent-green)';
+    })
+    .catch(function(err) {
+      el.textContent = 'Failed: ' + err.message;
+    });
+}
+
+function loadClickStats() {
+  var el = document.getElementById('clicks-result');
+  el.textContent = 'Loading...';
+
+  fetch(API_BASE + '/api/clicks/summary')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        el.textContent = 'Error: ' + data.error;
+        return;
+      }
+      el.innerHTML = 'Total clicks: ' + escapeHtml(String(data.totalClicks || 0)) +
+        ' | Today: ' + escapeHtml(String(data.clicksToday || 0)) +
+        ' | Top: ' + escapeHtml(data.topCampaign || '-');
+      el.style.color = 'var(--accent-3)';
+    })
+    .catch(function(err) {
+      el.textContent = 'Failed: ' + err.message;
+    });
+}
+
+function loadPostHistory() {
+  var el = document.getElementById('post-history-result');
+  el.textContent = 'Loading...';
+
+  fetch(API_BASE + '/api/posts/recent')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        el.textContent = 'No posts yet or API not available';
+        return;
+      }
+      var posts = data.posts || data || [];
+      if (posts.length === 0) {
+        el.textContent = 'No posts found.';
+        return;
+      }
+      el.innerHTML = posts.slice(0, 5).map(function(p) {
+        return '<div style="margin-bottom:6px; padding:6px 0; border-bottom:1px solid var(--border);">' +
+          '<span style="color:var(--accent-3);">' + escapeHtml(p.platform || '-') + '</span> ' +
+          '<span style="color:var(--text-secondary);">' + escapeHtml((p.content_text || p.text || '').substring(0, 60)) + '...</span>' +
+          '</div>';
+      }).join('');
+      el.style.color = 'var(--text-secondary)';
+    })
+    .catch(function(err) {
+      el.textContent = 'Failed: ' + err.message;
+    });
+}
+
+function runFullAuto() {
+  var el = document.getElementById('full-auto-result');
+  el.textContent = 'Running all automation tasks...';
+  el.style.color = 'var(--accent-yellow)';
+
+  var tasks = [
+    fetch(API_BASE + '/api/monitor/run/both', { method: 'POST', headers: getAuthHeaders() }).then(function(r) { return r.json(); }),
+    fetch(API_BASE + '/api/discovery/run/all', { method: 'POST', headers: getAuthHeaders() }).then(function(r) { return r.json(); }),
+  ];
+
+  Promise.allSettled(tasks).then(function(results) {
+    var success = results.filter(function(r) { return r.status === 'fulfilled'; }).length;
+    var failed = results.filter(function(r) { return r.status === 'rejected'; }).length;
+    el.textContent = 'Completed: ' + success + ' succeeded, ' + failed + ' failed';
+    el.style.color = failed === 0 ? 'var(--accent-green)' : 'var(--accent-yellow)';
+    loadMonitorData();
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+initSupabase();
+</script>
+</body>
+</html>
