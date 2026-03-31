@@ -32,6 +32,7 @@ import { createMonitorRunner } from "../monitoring/monitor-runner.js";
 import { createCampaignRepository } from "../discovery/campaign-repository.js";
 import { createDiscoveryPipeline } from "../discovery/discovery-pipeline.js";
 import type { RunResult } from "../monitoring/types.js";
+import { createCheckoutSession, handleWebhook, collectRequestBody } from "./stripe.js";
 
 const PORT = Number(process.env.CLAUDEX_API_PORT ?? 3001);
 const BEARER_TOKEN = process.env.TWITTER_BEARER_TOKEN ?? "";
@@ -264,6 +265,8 @@ function routeRequest(path: string): { body: string; status: number; headers: Re
       "GET /api/monitor/tweets",
       "POST /api/monitor/run/{keyword|influencer|both}",
       "POST /api/discovery/run/{tweet|defilama|all}",
+      "POST /api/stripe/checkout",
+      "POST /api/stripe/webhook",
     ],
   }, 404);
 }
@@ -288,10 +291,14 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
 
   // POST endpoints
   if (req.method === "POST") {
-    const auth = requireAuth(req);
-    if (!auth.authorized) {
-      sendResponse(res, auth.response!);
-      return;
+    // Stripe webhook uses its own signature verification, skip bearer auth
+    const isWebhook = url.pathname === "/api/stripe/webhook";
+    if (!isWebhook) {
+      const auth = requireAuth(req);
+      if (!auth.authorized) {
+        sendResponse(res, auth.response!);
+        return;
+      }
     }
 
     const monitorModes: Record<string, "keyword" | "influencer" | "both"> = {
@@ -322,6 +329,53 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
     if (discoveryMode) {
       handleDiscoveryRun(discoveryMode).then(
         (response) => sendResponse(res, response),
+        (error) => {
+          const msg = error instanceof Error ? error.message : String(error);
+          sendResponse(res, jsonResponse({ error: msg }, 500));
+        }
+      );
+      return;
+    }
+
+    // Stripe: Create checkout session (requires auth)
+    if (url.pathname === "/api/stripe/checkout") {
+      collectRequestBody(req).then(
+        async (body) => {
+          try {
+            const parsed = JSON.parse(body) as { userId?: string; plan?: string };
+            const { userId, plan } = parsed;
+            if (!userId || !plan || (plan !== "pro" && plan !== "unlimited")) {
+              sendResponse(res, jsonResponse({ error: "userId and plan (pro|unlimited) required" }, 400));
+              return;
+            }
+            const result = await createCheckoutSession(userId, plan);
+            sendResponse(res, jsonResponse(result));
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            sendResponse(res, jsonResponse({ error: msg }, 500));
+          }
+        },
+        (error) => {
+          const msg = error instanceof Error ? error.message : String(error);
+          sendResponse(res, jsonResponse({ error: msg }, 500));
+        }
+      );
+      return;
+    }
+
+    // Stripe: Webhook handler (no auth, uses Stripe signature verification)
+    if (url.pathname === "/api/stripe/webhook") {
+      collectRequestBody(req).then(
+        async (body) => {
+          try {
+            const signature = (req.headers["stripe-signature"] as string) ?? "";
+            const result = await handleWebhook(body, signature);
+            sendResponse(res, jsonResponse(result));
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            sendResponse(res, jsonResponse({ error: msg }, 400));
+          }
+        },
         (error) => {
           const msg = error instanceof Error ? error.message : String(error);
           sendResponse(res, jsonResponse({ error: msg }, 500));
