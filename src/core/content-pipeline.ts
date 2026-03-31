@@ -130,7 +130,7 @@ Tone: casual, friendly, honest, curious. Never pushy or salesy.
 Write in natural Japanese. No emojis. Under 240 characters.
 Sound like a real person sharing genuine thoughts, not a bot.
 Always include DYOR.`;
-      userPrompt = `Write a short news-style tweet about: ${topic}. Share it like you just read about it. DYOR.`;
+      userPrompt = `以下のトピックについて日本語で短いツイートを書いてください。ニュースを読んだばかりの初心者の感想として自然に書いてください。DYORを含めてください。トピック: ${topic}`;
     } else if (projectData) {
       const patternConfig = getPatternById(pattern);
       const prompts = buildTweetPrompt(patternConfig, projectData);

@@ -490,7 +490,8 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
             } : undefined,
           });
 
-          const draft = await pipeline.generateDraft(pattern, pattern);
+          const topic = body.topic || "DeFiやエアドロップについて日本語で投稿してください";
+          const draft = await pipeline.generateDraft(topic, pattern);
           const result = await pipeline.postDraft(draft.id);
           pipeline.close();
 
